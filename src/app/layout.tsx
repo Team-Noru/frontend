@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
-import localFont from "next/font/local";
-import "./globals.css";
+import localFont from 'next/font/local';
+
+import type { Metadata } from 'next';
+import './globals.css';
 
 const pretendard = localFont({
 	src: './fonts/PretendardVariable.woff2',
@@ -10,22 +11,22 @@ const pretendard = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "TEAM NORU",
-  description: "NORU NORU",
+	title: 'TEAM NORU',
+	description: 'NORU NORU',
 };
 
 export default function RootLayout({
-  children,
+	children,
 }: Readonly<{
-  children: React.ReactNode;
+	children: React.ReactNode;
 }>) {
-  return (
-    <html lang="en">
-      <body
-        className={`${pretendard.className} antialiased flex w-dvw h-dvh overflow-hidden bg-custom-gray-bg`}
-      >
-        {children}
-      </body>
-    </html>
-  );
+	return (
+		<html lang="en">
+			<body
+				className={`${pretendard.className} antialiased flex w-dvw h-dvh overflow-hidden bg-custom-gray-bg`}
+			>
+				{children}
+			</body>
+		</html>
+	);
 }
