@@ -8,11 +8,14 @@ import Image from 'next/image';
 import { scaleLog } from '@visx/scale';
 import { Text } from '@visx/text';
 import { Wordcloud } from '@visx/wordcloud';
+import { GraphEdge, GraphNode } from 'reagraph';
 
 import CompanyItem from '@/components/CompanyItem';
 import NewsItem from '@/components/NewsItem';
+import { useGetCompanyNewsById } from '@/hooks/api/company/useGetCompanyNewsById';
 import { getStockImageUrl } from '@/lib/values';
-import { CompanyDetailData } from '@/types/company';
+import { CompanyDetailData, Sentiment } from '@/types/company';
+import { News } from '@/types/news';
 
 interface Props {
 	companyId: string;
@@ -23,27 +26,27 @@ interface WordData {
 	value: number;
 }
 
-interface NewsData {
-	id: number;
-	title: string;
-	description: string;
-	publishedAt: string;
-	thumbnailUrl?: string;
-	publisher: string;
-	author: string;
-}
-
 const GraphCanvas = dynamic(
 	() => import('reagraph').then((mod) => mod.GraphCanvas),
 	{ ssr: false }
 );
 
 const CompanyDetailClientContainer: FC<Props> = ({ companyId }) => {
+	const { data: companyNewsData, isLoading: isCompanyNewsLoading } =
+		useGetCompanyNewsById(companyId);
+
+	if (isCompanyNewsLoading) {
+		return <div>Loading...</div>;
+	}
+
+	if (!companyNewsData) {
+		return <div>Company news not found</div>;
+	}
+
 	// TODO: 실제 API 호출로 대체
 	// 예시 데이터
 	const companyData: CompanyDetailData = {
-		id: companyId,
-		stockCode: '005930',
+		companyId: '005930',
 		name: '삼성전자',
 		isListed: true,
 		isDomestic: true,
@@ -54,8 +57,7 @@ const CompanyDetailClientContainer: FC<Props> = ({ companyId }) => {
 		],
 		related: [
 			{
-				id: '1',
-				stockCode: '055550',
+				companyId: '055550',
 				name: '신한지주',
 				isListed: true,
 				isDomestic: true,
@@ -63,8 +65,7 @@ const CompanyDetailClientContainer: FC<Props> = ({ companyId }) => {
 				tags: [{ id: 3, label: '금융' }],
 			},
 			{
-				id: '2',
-				stockCode: '035720',
+				companyId: '035720',
 				name: '카카오',
 				isListed: true,
 				isDomestic: true,
@@ -72,8 +73,7 @@ const CompanyDetailClientContainer: FC<Props> = ({ companyId }) => {
 				tags: [{ id: 4, label: '플랫폼' }],
 			},
 			{
-				id: '3',
-				stockCode: '035420',
+				companyId: '035420',
 				name: '네이버',
 				isListed: true,
 				isDomestic: true,
@@ -97,42 +97,11 @@ const CompanyDetailClientContainer: FC<Props> = ({ companyId }) => {
 		{ text: '인천', value: 60 },
 	];
 
-	// TODO: 실제 API 호출로 대체
-	const newsData: NewsData[] = [
-		{
-			id: 1,
-			title: "美 AI 엔지니어 200억 주는데...'AI 블랙홀'에 인재 유출 가속",
-			description:
-				'Coffee is the most popular drink in the world and drinking coffee in the morning has become a routine for many people before their activities.',
-			publishedAt: '2023-05-31',
-			publisher: 'SBS BIZ',
-			author: '홍길동',
-		},
-		{
-			id: 2,
-			title: "美 AI 엔지니어 200억 주는데...'AI 블랙홀'에 인재 유출 가속",
-			description:
-				'Coffee is the most popular drink in the world and drinking coffee in the morning has become a routine for many people before their activities.',
-			publishedAt: '2023-05-31',
-			publisher: 'SBS BIZ',
-			author: '홍길동',
-		},
-		{
-			id: 3,
-			title: "美 AI 엔지니어 200억 주는데...'AI 블랙홀'에 인재 유출 가속",
-			description:
-				'Coffee is the most popular drink in the world and drinking coffee in the morning has become a routine for many people before their activities.',
-			publishedAt: '2023-05-31',
-			publisher: 'SBS BIZ',
-			author: '홍길동',
-		},
-	];
-
 	return (
 		<CompanyDetailClient
 			companyData={companyData}
 			wordCloudData={wordCloudData}
-			newsData={newsData}
+			newsData={companyNewsData}
 		/>
 	);
 };
@@ -140,7 +109,7 @@ const CompanyDetailClientContainer: FC<Props> = ({ companyId }) => {
 interface CompanyDetailClientProps {
 	companyData: CompanyDetailData;
 	wordCloudData: WordData[];
-	newsData: NewsData[];
+	newsData: News[];
 }
 const CompanyDetailClient: FC<CompanyDetailClientProps> = ({
 	companyData,
@@ -151,14 +120,14 @@ const CompanyDetailClient: FC<CompanyDetailClientProps> = ({
 	const { nodes, edges } = useMemo(() => {
 		const graphNodes = [
 			{
-				id: companyData.id,
+				id: companyData.companyId,
 				label: companyData.name,
 				fill: '#10b981', // green-500
 				size: 50,
 				data: companyData,
 			},
 			...companyData.related.map((related) => ({
-				id: related.id,
+				id: related.companyId,
 				label: related.name,
 				fill: '#e5e7eb', // gray-200
 				size: 40,
@@ -167,9 +136,9 @@ const CompanyDetailClient: FC<CompanyDetailClientProps> = ({
 		];
 
 		const graphEdges = companyData.related.map((related) => ({
-			id: `${companyData.id}-${related.id}`,
-			source: companyData.id,
-			target: related.id,
+			id: `${companyData.companyId}-${related.companyId}`,
+			source: companyData.companyId,
+			target: related.companyId,
 			label: '',
 			size: 2,
 			fill: '#10b981', // green-500
@@ -196,16 +165,16 @@ const CompanyDetailClient: FC<CompanyDetailClientProps> = ({
 					<h1 className="text-3xl font-bold mb-4">서비스이름</h1>
 					<div className="flex items-center gap-4">
 						<div className="flex items-center gap-3">
-							{companyData.stockCode &&
+							{companyData.companyId &&
 								getStockImageUrl(
-									companyData.stockCode,
+									companyData.companyId,
 									companyData.isDomestic
 								) && (
 									<div className="relative w-16 h-16 bg-white rounded-lg border border-border overflow-hidden flex items-center justify-center">
 										<Image
 											src={
 												getStockImageUrl(
-													companyData.stockCode,
+													companyData.companyId,
 													companyData.isDomestic
 												)!
 											}
@@ -226,8 +195,8 @@ const CompanyDetailClient: FC<CompanyDetailClientProps> = ({
 						{/* 네트워크 그래프 */}
 						<div className="h-[600px] w-full border border-border rounded-lg overflow-hidden bg-white relative">
 							<GraphCanvas
-								nodes={nodes}
-								edges={edges}
+								nodes={nodes as GraphNode[]}
+								edges={edges as GraphEdge[]}
 								layoutType="forceDirected2d"
 								labelType="all"
 								edgeInterpolation="curved"
@@ -302,7 +271,6 @@ const CompanyDetailClient: FC<CompanyDetailClientProps> = ({
 											publishedAt={news.publishedAt}
 											thumbnailUrl={news.thumbnailUrl}
 											publisher={news.publisher}
-											author={news.author}
 										/>
 									))}
 								</div>
@@ -339,13 +307,12 @@ const CompanyDetailClient: FC<CompanyDetailClientProps> = ({
 						<div className="space-y-3">
 							{companyData.related.map((company) => (
 								<CompanyItem
-									key={company.id}
-									id={company.id}
-									stockCode={company.stockCode}
+									key={company.companyId}
+									companyId={company.companyId}
 									name={company.name}
 									isListed={company.isListed}
 									isDomestic={company.isDomestic}
-									sentiment={companyData.sentiment}
+									sentiment={company.sentiment as Sentiment}
 									tags={company.tags}
 									showSentiment={false}
 								/>

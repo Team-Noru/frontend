@@ -2,7 +2,7 @@
 
 import CompanyItem from '@/components/CompanyItem';
 import NewsItem from '@/components/NewsItem';
-import { useGetNewsByDate } from '@/hooks/api/useGetNewsByDate';
+import { useGetNewsByDate } from '@/hooks/api/news/useGetNewsByDate';
 import { Sentiment } from '@/types/company';
 
 const HomeClientContainer = () => {

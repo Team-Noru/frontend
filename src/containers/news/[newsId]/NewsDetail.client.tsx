@@ -5,7 +5,7 @@ import { FC } from 'react';
 import Image from 'next/image';
 
 import CompanyItem from '@/components/CompanyItem';
-import { useGetNewsDetailById } from '@/hooks/api/useGetNewsDetailById';
+import { useGetNewsDetailById } from '@/hooks/api/news/useGetNewsDetailById';
 
 interface Props {
 	newsId: number;

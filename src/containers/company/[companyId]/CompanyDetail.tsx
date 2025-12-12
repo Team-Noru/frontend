@@ -1,5 +1,13 @@
 import { FC } from 'react';
 
+import {
+	dehydrate,
+	HydrationBoundary,
+	QueryClient,
+} from '@tanstack/react-query';
+
+import { getCompanyNewsById } from '@/service/company';
+
 import CompanyDetailClientContainer from './CompanyDetail.client';
 
 interface Props {
@@ -10,8 +18,18 @@ interface Props {
 
 const CompanyDetailContainer: FC<Props> = async ({ params }) => {
 	const { companyId } = await params;
+	const queryClient = new QueryClient();
 
-	return <CompanyDetailClientContainer companyId={companyId} />;
+	await queryClient.prefetchQuery({
+		queryKey: ['company', companyId],
+		queryFn: () => getCompanyNewsById(companyId),
+	});
+
+	return (
+		<HydrationBoundary state={dehydrate(queryClient)}>
+			<CompanyDetailClientContainer companyId={companyId} />
+		</HydrationBoundary>
+	);
 };
 
 export default CompanyDetailContainer;
