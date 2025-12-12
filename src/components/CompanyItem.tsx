@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { FC } from 'react';
 
 import Image from 'next/image';
 import Link from 'next/link';
@@ -9,56 +9,57 @@ import {
 	getSentimentLabel,
 	getStockImageUrl,
 } from '@/lib/values';
-import { Sentiment, Tag } from '@/types/company';
+import { Company } from '@/types/company';
 
-interface CompanyItemProps {
-	id: string;
-	stockCode?: string;
-	name: string;
-	isListed?: boolean;
-	sentiment?: Sentiment;
-	tags?: Tag[];
-	// 기존 props (하위 호환성)
-	logo?: ReactNode;
+interface Props extends Company {
 	price?: string;
-	// 표시 옵션
 	showSentiment?: boolean;
 }
 
-export default function CompanyItem({
-	id,
-	stockCode,
+const CompanyItem: FC<Props> = ({
+	companyId,
 	name,
 	isListed,
 	sentiment,
+	isDomestic,
 	tags = [],
-	logo,
 	price,
 	showSentiment = false,
-}: CompanyItemProps) {
-	const stockImageUrl = getStockImageUrl(stockCode);
+}) => {
+	const stockImageUrl = getStockImageUrl(companyId, isDomestic);
 
-	return (
-		<Link
-			href={`/company/${id}`}
-			className="flex flex-col gap-3 p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors cursor-pointer"
+	const content = (
+		<div
+			className={cn(
+				'flex flex-col gap-3 p-4 bg-muted/50 rounded-lg transition-colors',
+				isDomestic
+					? 'hover:bg-muted cursor-pointer'
+					: 'opacity-60 cursor-not-allowed'
+			)}
 		>
 			<div className="flex items-start gap-3">
 				{/* 로고 */}
 				<div className="shrink-0 w-12 h-12 bg-white rounded-lg flex items-center justify-center border border-border overflow-hidden">
-					{stockImageUrl ? (
-						<Image
-							src={stockImageUrl}
-							alt={name}
-							width={48}
-							height={48}
-							className="object-contain"
-						/>
-					) : logo ? (
-						logo
-					) : (
-						<div className="w-8 h-8 bg-gray-200 rounded"></div>
-					)}
+					{stockImageUrl &&
+						(isDomestic ? (
+							<Image
+								src={stockImageUrl}
+								alt={name}
+								width={48}
+								height={48}
+								className="object-contain"
+							/>
+						) : (
+							<Image
+								src={stockImageUrl}
+								alt={name}
+								width={32}
+								height={32}
+								className="object-contain"
+								unoptimized
+								preload
+							/>
+						))}
 				</div>
 
 				{/* 회사 정보 */}
@@ -70,9 +71,9 @@ export default function CompanyItem({
 								{isListed ? '상장' : '비상장'}
 							</span>
 						)}
-						{stockCode && (
+						{companyId && (
 							<span className="text-xs text-muted-foreground">
-								({stockCode})
+								({companyId})
 							</span>
 						)}
 					</div>
@@ -108,6 +109,18 @@ export default function CompanyItem({
 					))}
 				</div>
 			)}
-		</Link>
+		</div>
 	);
-}
+
+	if (isDomestic) {
+		return (
+			<Link href={`/company/${companyId}`} className="block">
+				{content}
+			</Link>
+		);
+	}
+
+	return content;
+};
+
+export default CompanyItem;
