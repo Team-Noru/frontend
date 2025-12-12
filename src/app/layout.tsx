@@ -1,6 +1,9 @@
 import localFont from 'next/font/local';
 
+import QueryClientProvider from '@/components/providers/QueryClientProvider';
+
 import type { Metadata } from 'next';
+
 import './globals.css';
 
 const pretendard = localFont({
@@ -25,7 +28,7 @@ export default function RootLayout({
 			<body
 				className={`${pretendard.className} antialiased flex w-dvw h-dvh overflow-hidden bg-custom-gray-bg`}
 			>
-				{children}
+				<QueryClientProvider>{children}</QueryClientProvider>
 			</body>
 		</html>
 	);

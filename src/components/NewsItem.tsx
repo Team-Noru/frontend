@@ -1,27 +1,27 @@
 'use client';
 
+import { FC } from 'react';
+
 import Image from 'next/image';
 import Link from 'next/link';
 
-interface NewsItemProps {
+interface Props {
 	id: number;
 	title: string;
 	description: string;
-	pulishedAt: string; // 2025-11-30
+	publishedAt: string;
 	thumbnailUrl?: string;
 	publisher: string;
-	author: string;
 }
 
-export default function NewsItem({
+const NewsItem: FC<Props> = ({
 	id,
 	title,
 	description,
-	pulishedAt,
+	publishedAt,
 	thumbnailUrl,
 	publisher,
-	author,
-}: NewsItemProps) {
+}) => {
 	// 날짜 포맷팅 (2025-11-30 -> May 31, 2023 형식으로 변환)
 	const formatDate = (dateString: string) => {
 		try {
@@ -35,6 +35,10 @@ export default function NewsItem({
 			return dateString;
 		}
 	};
+
+	if (process.env.NODE_ENV === 'development') {
+		thumbnailUrl = undefined;
+	}
 
 	return (
 		<Link
@@ -63,11 +67,11 @@ export default function NewsItem({
 				<div className="flex items-center gap-2 text-xs text-muted-foreground mt-auto">
 					<span className="font-medium">{publisher}</span>
 					<span>•</span>
-					<span>{author}</span>
-					<span>•</span>
-					<span>{formatDate(pulishedAt)}</span>
+					<span>{formatDate(publishedAt)}</span>
 				</div>
 			</div>
 		</Link>
 	);
-}
+};
+
+export default NewsItem;

@@ -37,10 +37,17 @@ export const getSentimentColor = (sentiment?: string) => {
 	}
 };
 
-export const getStockImageUrl = (code?: string) => {
-	if (!code) return null;
-	const encodedUrl = encodeURIComponent(
-		`https://static.toss.im/png-icons/securities/icn-sec-fill-${code}.png`
-	);
-	return `https://images.tossinvest.com/${encodedUrl}?width=64&height=64`;
+export const getStockImageUrl = (code?: string, isDomestic: boolean = true) => {
+	if (!code) {
+		return null;
+	}
+	if (isDomestic) {
+		const encodedUrl = encodeURIComponent(
+			`https://static.toss.im/png-icons/securities/icn-sec-fill-${code}.png`
+		);
+		return `https://images.tossinvest.com/${encodedUrl}?width=64&height=64`;
+	} else {
+		const smallCode = code.toLowerCase();
+		return `https://eodhd.com/img/logos/US/${smallCode}.png`;
+	}
 };

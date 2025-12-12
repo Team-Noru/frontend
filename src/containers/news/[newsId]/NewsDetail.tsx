@@ -25,6 +25,7 @@ interface RelatedCompany {
 		id: number;
 		label: string;
 	}>;
+	isDomestic: boolean;
 }
 
 const NewsDetailContainer: FC<Props> = async ({ params }) => {
@@ -56,12 +57,14 @@ const NewsDetailContainer: FC<Props> = async ({ params }) => {
 				{ id: 1, label: '반도체' },
 				{ id: 2, label: 'AI' },
 			],
+			isDomestic: true,
 		},
 		{
 			id: '2',
 			stockCode: '035720',
 			name: '카카오',
 			isListed: true,
+			isDomestic: true,
 			sentiment: 'slightlyPositive',
 			tags: [
 				{ id: 3, label: '플랫폼' },
@@ -73,6 +76,7 @@ const NewsDetailContainer: FC<Props> = async ({ params }) => {
 			stockCode: '035420',
 			name: '네이버',
 			isListed: true,
+			isDomestic: true,
 			sentiment: 'neutral',
 			tags: [{ id: 5, label: '플랫폼' }],
 		},
@@ -81,6 +85,7 @@ const NewsDetailContainer: FC<Props> = async ({ params }) => {
 			stockCode: '',
 			name: 'OpenAI',
 			isListed: false,
+			isDomestic: false,
 			sentiment: 'negative',
 			tags: [
 				{ id: 6, label: 'AI' },
@@ -153,6 +158,7 @@ const NewsDetailContainer: FC<Props> = async ({ params }) => {
 										stockCode={company.stockCode}
 										name={company.name}
 										isListed={company.isListed}
+										isDomestic={company.isDomestic}
 										sentiment={company.sentiment}
 										tags={company.tags}
 										showSentiment={true}
