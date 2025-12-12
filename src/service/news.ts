@@ -1,6 +1,6 @@
 import { formatDateToYYYYMMDD } from '@/lib/format';
 import { ApiResponse } from '@/types/api';
-import { News } from '@/types/news';
+import { News, NewsDetail } from '@/types/news';
 
 const API_URL = `${process.env.SERVICE_URL}/news`;
 
@@ -23,5 +23,26 @@ export const getNewsByDate = async (date: string) => {
 	} catch (error) {
 		console.error(error);
 		return [];
+	}
+};
+
+export const getNewsDetailById = async (newsId: number) => {
+	try {
+		const response = await fetch(`${API_URL}/${newsId}`, {
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+		});
+
+		if (!response.ok) {
+			throw new Error('Failed to fetch news detail');
+		}
+
+		const data: ApiResponse<NewsDetail> = await response.json();
+		return data.data;
+	} catch (error) {
+		console.error(error);
+		return undefined;
 	}
 };
