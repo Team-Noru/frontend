@@ -6,7 +6,10 @@ import {
 	QueryClient,
 } from '@tanstack/react-query';
 
-import { getCompanyNewsById } from '@/service/company';
+import {
+	getCompanyAnnouncementsById,
+	getCompanyNewsById,
+} from '@/service/company';
 
 import CompanyDetailClientContainer from './CompanyDetail.client';
 
@@ -20,10 +23,16 @@ const CompanyDetailContainer: FC<Props> = async ({ params }) => {
 	const { companyId } = await params;
 	const queryClient = new QueryClient();
 
-	await queryClient.prefetchQuery({
-		queryKey: ['company', companyId],
-		queryFn: () => getCompanyNewsById(companyId),
-	});
+	Promise.all([
+		await queryClient.prefetchQuery({
+			queryKey: ['company', companyId],
+			queryFn: () => getCompanyNewsById(companyId),
+		}),
+		await queryClient.prefetchQuery({
+			queryKey: ['company', companyId, 'announcements'],
+			queryFn: () => getCompanyAnnouncementsById(companyId),
+		}),
+	]);
 
 	return (
 		<HydrationBoundary state={dehydrate(queryClient)}>

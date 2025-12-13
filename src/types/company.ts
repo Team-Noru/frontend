@@ -22,3 +22,12 @@ export interface Company {
 export interface CompanyDetailData extends Company {
 	related: Company[];
 }
+
+export interface Announcement {
+	announcementId: number;
+	companyId: string;
+	category: string;
+	title: string;
+	announcementUrl: string;
+	publishedAt: string;
+}

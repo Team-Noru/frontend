@@ -43,10 +43,10 @@ const NewsItem: FC<Props> = ({
 	return (
 		<Link
 			href={`/news/${id}`}
-			className="flex gap-4 p-4 hover:bg-muted/50 transition-colors rounded-lg cursor-pointer border border-border"
+			className="flex flex-col sm:flex-row gap-3 sm:gap-4 p-3 sm:p-4 hover:bg-muted/50 transition-colors rounded-lg cursor-pointer border border-border"
 		>
 			{/* 썸네일 이미지 */}
-			<div className="shrink-0 w-32 h-24 bg-muted rounded-lg overflow-hidden border border-border">
+			<div className="shrink-0 w-full sm:w-32 h-32 sm:h-24 bg-muted rounded-lg overflow-hidden border border-border relative">
 				{thumbnailUrl ? (
 					<Image src={thumbnailUrl} alt={title} fill className="object-cover" />
 				) : (
@@ -57,14 +57,14 @@ const NewsItem: FC<Props> = ({
 			</div>
 
 			{/* 텍스트 내용 */}
-			<div className="flex-1 flex flex-col gap-2 min-w-0">
-				<h3 className="font-semibold text-lg leading-tight line-clamp-2">
+			<div className="flex-1 flex flex-col gap-1.5 sm:gap-2 min-w-0">
+				<h3 className="font-semibold text-base sm:text-lg leading-tight line-clamp-2 sm:line-clamp-2">
 					{title}
 				</h3>
-				<p className="text-sm text-muted-foreground line-clamp-2">
+				<p className="text-xs sm:text-sm text-muted-foreground line-clamp-2 sm:line-clamp-2">
 					{description}
 				</p>
-				<div className="flex items-center gap-2 text-xs text-muted-foreground mt-auto">
+				<div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs text-muted-foreground mt-auto">
 					<span className="font-medium">{publisher}</span>
 					<span>•</span>
 					<span>{formatDate(publishedAt)}</span>
