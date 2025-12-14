@@ -5,7 +5,6 @@ import { FC, useState } from 'react';
 import Image from 'next/image';
 
 import CompanyItem from '@/components/CompanyItem';
-import MobileHeader from '@/components/ui/MobileHeader';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { NewsDetail } from '@/types/news';
 
@@ -18,7 +17,6 @@ const NewsDetailClient: FC<Props> = ({ newsData }) => {
 
 	return (
 		<div className="w-full h-full bg-white overflow-auto">
-			<MobileHeader fallbackUrl="/" />
 			<div className="max-w-7xl mx-auto p-4 sm:p-6 md:p-8">
 				{/* 데스크톱 레이아웃 */}
 				<div className="hidden lg:flex flex-row gap-8">
