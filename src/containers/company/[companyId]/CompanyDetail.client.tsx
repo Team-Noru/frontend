@@ -14,19 +14,20 @@ import CompanyItem from '@/components/CompanyItem';
 import NewsItem from '@/components/NewsItem';
 import MobileHeader from '@/components/ui/MobileHeader';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useGetCompanyAnnouncements } from '@/hooks/api/company/useGetCompanyAnnouncements';
-import { useGetCompanyNewsById } from '@/hooks/api/company/useGetCompanyNewsById';
 import { getStockImageUrl } from '@/lib/values';
-import { Announcement, CompanyDetailData, Sentiment } from '@/types/company';
+import {
+	Announcement,
+	CompanyDetail,
+	Sentiment,
+	WordData,
+} from '@/types/company';
 import { News } from '@/types/news';
 
 interface Props {
-	companyId: string;
-}
-
-interface WordData {
-	text: string;
-	value: number;
+	companyData: CompanyDetail;
+	wordCloudData: WordData[];
+	newsData: News[];
+	announcementsData: Announcement[];
 }
 
 const GraphCanvas = dynamic(
@@ -34,92 +35,7 @@ const GraphCanvas = dynamic(
 	{ ssr: false }
 );
 
-const CompanyDetailClientContainer: FC<Props> = ({ companyId }) => {
-	const { data: companyNewsData, isLoading: isCompanyNewsLoading } =
-		useGetCompanyNewsById(companyId);
-	const {
-		data: companyAnnouncementsData,
-		isLoading: isCompanyAnnouncementsLoading,
-	} = useGetCompanyAnnouncements(companyId);
-
-	if (isCompanyNewsLoading || isCompanyAnnouncementsLoading) {
-		return <div>Loading...</div>;
-	}
-
-	const companyData: CompanyDetailData = {
-		companyId: '005930',
-		name: '삼성전자',
-		isListed: true,
-		isDomestic: true,
-		sentiment: 'positive',
-		tags: [
-			{ id: 1, label: '반도체' },
-			{ id: 2, label: 'AI' },
-		],
-		price: 100000,
-		related: [
-			{
-				companyId: '055550',
-				name: '신한지주',
-				isListed: true,
-				isDomestic: true,
-				sentiment: 'positive',
-				tags: [{ id: 3, label: '금융' }],
-				price: 100000,
-			},
-			{
-				companyId: '035720',
-				name: '카카오',
-				isListed: true,
-				isDomestic: true,
-				sentiment: 'slightlyPositive',
-				tags: [{ id: 4, label: '플랫폼' }],
-				price: 100000,
-			},
-			{
-				companyId: '035420',
-				name: '네이버',
-				isListed: true,
-				isDomestic: true,
-				sentiment: 'neutral',
-				tags: [{ id: 5, label: '플랫폼' }],
-				price: 100000,
-			},
-		],
-	};
-
-	// TODO: 실제 API 호출로 대체
-	const wordCloudData: WordData[] = [
-		{ text: '미국', value: 150 },
-		{ text: '한국', value: 120 },
-		{ text: '일본', value: 100 },
-		{ text: '국회', value: 90 },
-		{ text: '이재명', value: 85 },
-		{ text: '더불어민주당', value: 80 },
-		{ text: '삼성전자', value: 75 },
-		{ text: '경기도', value: 70 },
-		{ text: '부산', value: 65 },
-		{ text: '인천', value: 60 },
-	];
-
-	return (
-		<CompanyDetailClient
-			companyData={companyData}
-			wordCloudData={wordCloudData}
-			newsData={companyNewsData || []}
-			announcementsData={companyAnnouncementsData || []}
-		/>
-	);
-};
-
-interface CompanyDetailClientProps {
-	companyData: CompanyDetailData;
-	wordCloudData: WordData[];
-	newsData: News[];
-	announcementsData: Announcement[];
-}
-
-const CompanyDetailClient: FC<CompanyDetailClientProps> = ({
+const CompanyDetailClientContainer: FC<Props> = ({
 	companyData,
 	wordCloudData,
 	newsData,
@@ -137,7 +53,7 @@ const CompanyDetailClient: FC<CompanyDetailClientProps> = ({
 				data: companyData,
 			},
 			...companyData.related.map((related) => ({
-				id: related.companyId,
+				id: related.companyId || related.name,
 				label: related.name,
 				fill: '#e5e7eb', // gray-200
 				size: 40,
@@ -146,9 +62,9 @@ const CompanyDetailClient: FC<CompanyDetailClientProps> = ({
 		];
 
 		const graphEdges = companyData.related.map((related) => ({
-			id: `${companyData.companyId}-${related.companyId}`,
+			id: `${companyData.companyId}-${related.companyId || related.name}`,
 			source: companyData.companyId,
-			target: related.companyId,
+			target: related.companyId || related.name,
 			label: '',
 			size: 2,
 			fill: '#10b981', // green-500
@@ -209,6 +125,7 @@ const CompanyDetailClient: FC<CompanyDetailClientProps> = ({
 											alt={companyData.name}
 											fill
 											className="object-contain"
+											sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 1280px"
 										/>
 									</div>
 								)}
@@ -362,7 +279,7 @@ const CompanyDetailClient: FC<CompanyDetailClientProps> = ({
 						<div className="space-y-3">
 							{companyData.related.map((company) => (
 								<CompanyItem
-									key={company.companyId}
+									key={`${company.companyId || ''}-${company.name}`}
 									companyId={company.companyId}
 									name={company.name}
 									isListed={company.isListed}

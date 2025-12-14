@@ -1,5 +1,5 @@
 import { ApiResponse } from '@/types/api';
-import { Announcement } from '@/types/company';
+import { Announcement, CompanyDetail } from '@/types/company';
 import { News } from '@/types/news';
 
 // const CLIENT_API_URL = `${process.env.NEXT_PUBLIC_API_URL}/companies`;
@@ -44,5 +44,26 @@ export const getCompanyAnnouncementsById = async (companyId: string) => {
 	} catch (error) {
 		console.error(error);
 		return [];
+	}
+};
+
+export const getCompanyDetailById = async (companyId: string) => {
+	try {
+		const response = await fetch(`${API_URL}/${companyId}`, {
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+		});
+
+		if (!response.ok) {
+			throw new Error('Failed to fetch company detail');
+		}
+
+		const data: ApiResponse<CompanyDetail> = await response.json();
+		return data.data;
+	} catch (error) {
+		console.error(error);
+		return null;
 	}
 };

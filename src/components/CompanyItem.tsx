@@ -23,6 +23,7 @@ const CompanyItem: FC<Props> = ({
 	price,
 	showSentiment = false,
 }) => {
+	console.log(companyId, name, isListed, sentiment, isDomestic, tags, price);
 	const stockImageUrl = getStockImageUrl(companyId, isDomestic);
 	const shouldShowInitial = !isListed && isDomestic && !stockImageUrl;
 	const initialLetter = name.charAt(0).toUpperCase();
@@ -101,7 +102,7 @@ const CompanyItem: FC<Props> = ({
 				<div className="flex flex-wrap gap-1.5 sm:gap-2 mt-0.5 sm:mt-1">
 					{tags.map((tag) => (
 						<span
-							key={tag.id}
+							key={`${companyId}-${tag.label}`}
 							className="px-2 py-0.5 sm:py-1 text-xs bg-secondary text-secondary-foreground rounded-md"
 						>
 							{tag.label}
