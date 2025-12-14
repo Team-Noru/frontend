@@ -20,7 +20,7 @@ export interface Company {
 	price: number;
 }
 
-export interface CompanyDetailData extends Company {
+export interface CompanyDetail extends Company {
 	related: Company[];
 }
 
@@ -31,4 +31,9 @@ export interface Announcement {
 	title: string;
 	announcementUrl: string;
 	publishedAt: string;
+}
+
+export interface WordData {
+	text: string;
+	value: number;
 }
