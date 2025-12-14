@@ -5,65 +5,15 @@ import { useState } from 'react';
 import CompanyItem from '@/components/CompanyItem';
 import NewsItem from '@/components/NewsItem';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useGetNewsByDate } from '@/hooks/api/news/useGetNewsByDate';
 import { Sentiment } from '@/types/company';
+import { News } from '@/types/news';
 
-const HomeClientContainer = () => {
-	const { data: newsData } = useGetNewsByDate('2025-11-30');
+interface Props {
+	newsData: News[];
+}
+
+const HomeClientContainer: React.FC<Props> = ({ newsData }) => {
 	const [activeTab, setActiveTab] = useState('news');
-	// 예시 데이터
-	// const newsData = [
-	// 	{
-	// 		id: 1,
-	// 		title: "美 AI 엔지니어 200억 주는데...'AI 블랙홀'에 인재 유출 가속",
-	// 		description:
-	// 			'Coffee is the most popular drink in the world and drinking coffee in the morning has become a routine for many people before their activities. Besides being considered to be able to provide energy intake, it turns out that the ...',
-	// 		pulishedAt: '2023-05-31',
-	// 		thumbnailUrl: undefined,
-	// 		publisher: 'SBS BIZ',
-	// 		author: '홍길동',
-	// 	},
-	// 	{
-	// 		id: 2,
-	// 		title: "美 AI 엔지니어 200억 주는데...'AI 블랙홀'에 인재 유출 가속",
-	// 		description:
-	// 			'Coffee is the most popular drink in the world and drinking coffee in the morning has become a routine for many people before their activities. Besides being considered to be able to provide energy intake, it turns out that the ...',
-	// 		pulishedAt: '2023-05-31',
-	// 		thumbnailUrl: undefined,
-	// 		publisher: 'SBS BIZ',
-	// 		author: '홍길동',
-	// 	},
-	// 	{
-	// 		id: 3,
-	// 		title: "美 AI 엔지니어 200억 주는데...'AI 블랙홀'에 인재 유출 가속",
-	// 		description:
-	// 			'Coffee is the most popular drink in the world and drinking coffee in the morning has become a routine for many people before their activities. Besides being considered to be able to provide energy intake, it turns out that the ...',
-	// 		pulishedAt: '2023-05-31',
-	// 		thumbnailUrl: undefined,
-	// 		publisher: 'SBS BIZ',
-	// 		author: '홍길동',
-	// 	},
-	// 	{
-	// 		id: 4,
-	// 		title: "美 AI 엔지니어 200억 주는데...'AI 블랙홀'에 인재 유출 가속",
-	// 		description:
-	// 			'Coffee is the most popular drink in the world and drinking coffee in the morning has become a routine for many people before their activities. Besides being considered to be able to provide energy intake, it turns out that the ...',
-	// 		pulishedAt: '2023-05-31',
-	// 		thumbnailUrl: undefined,
-	// 		publisher: 'SBS BIZ',
-	// 		author: '홍길동',
-	// 	},
-	// 	{
-	// 		id: 5,
-	// 		title: "美 AI 엔지니어 200억 주는데...'AI 블랙홀'에 인재 유출 가속",
-	// 		description:
-	// 			'Coffee is the most popular drink in the world and drinking coffee in the morning has become a routine for many people before their activities. Besides being considered to be able to provide energy intake, it turns out that the ...',
-	// 		pulishedAt: '2023-05-31',
-	// 		thumbnailUrl: undefined,
-	// 		publisher: 'SBS BIZ',
-	// 		author: '홍길동',
-	// 	},
-	// ];
 
 	const companies = [
 		{
@@ -73,6 +23,7 @@ const HomeClientContainer = () => {
 			isDomestic: true,
 			sentiment: 'positive',
 			tags: [],
+			price: 100000,
 		},
 		{
 			companyId: 'GOOGL',
@@ -81,6 +32,7 @@ const HomeClientContainer = () => {
 			isDomestic: false,
 			sentiment: 'positive',
 			tags: [],
+			price: 100000,
 		},
 		{
 			companyId: '005930',
@@ -89,6 +41,7 @@ const HomeClientContainer = () => {
 			isDomestic: true,
 			sentiment: 'positive',
 			tags: [],
+			price: 100000,
 		},
 		{
 			companyId: '035420',
@@ -97,6 +50,7 @@ const HomeClientContainer = () => {
 			isDomestic: true,
 			sentiment: 'positive',
 			tags: [],
+			price: 100000,
 		},
 	];
 
@@ -135,7 +89,7 @@ const HomeClientContainer = () => {
 						<div className="space-y-3">
 							{companies.map((company) => (
 								<CompanyItem
-									key={company.companyId}
+									key={`${company.companyId || ''}-${company.name}`}
 									companyId={company.companyId}
 									name={company.name}
 									isListed={company.isListed}
@@ -143,6 +97,7 @@ const HomeClientContainer = () => {
 									sentiment={company.sentiment as Sentiment}
 									tags={company.tags}
 									showSentiment={false}
+									price={company.price}
 								/>
 							))}
 						</div>
@@ -183,6 +138,7 @@ const HomeClientContainer = () => {
 										sentiment={company.sentiment as Sentiment}
 										tags={company.tags}
 										showSentiment={false}
+										price={company.price}
 									/>
 								))}
 							</div>

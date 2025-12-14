@@ -1,9 +1,9 @@
-'use client';
-
 import { FC } from 'react';
 
 import Image from 'next/image';
 import Link from 'next/link';
+
+import { formatDate } from '@/lib/format';
 
 interface Props {
 	id: number;
@@ -22,24 +22,6 @@ const NewsItem: FC<Props> = ({
 	thumbnailUrl,
 	publisher,
 }) => {
-	// 날짜 포맷팅 (2025-11-30 -> May 31, 2023 형식으로 변환)
-	const formatDate = (dateString: string) => {
-		try {
-			const date = new Date(dateString);
-			return date.toLocaleDateString('en-US', {
-				year: 'numeric',
-				month: 'short',
-				day: 'numeric',
-			});
-		} catch {
-			return dateString;
-		}
-	};
-
-	if (process.env.NODE_ENV === 'development') {
-		thumbnailUrl = undefined;
-	}
-
 	return (
 		<Link
 			href={`/news/${id}`}
@@ -48,7 +30,13 @@ const NewsItem: FC<Props> = ({
 			{/* 썸네일 이미지 */}
 			<div className="shrink-0 w-full sm:w-32 h-32 sm:h-24 bg-muted rounded-lg overflow-hidden border border-border relative">
 				{thumbnailUrl ? (
-					<Image src={thumbnailUrl} alt={title} fill className="object-cover" />
+					<Image
+						src={thumbnailUrl}
+						alt={title}
+						fill
+						sizes="(max-width: 640px) 100vw, 128px"
+						objectFit="cover"
+					/>
 				) : (
 					<div className="w-full h-full bg-gray-200 flex items-center justify-center">
 						<span className="text-gray-400 text-xs">이미지</span>
@@ -58,10 +46,10 @@ const NewsItem: FC<Props> = ({
 
 			{/* 텍스트 내용 */}
 			<div className="flex-1 flex flex-col gap-1.5 sm:gap-2 min-w-0">
-				<h3 className="font-semibold text-base sm:text-lg leading-tight line-clamp-2 sm:line-clamp-2">
+				<h3 className="font-semibold text-base sm:text-lg leading-tight line-clamp-1">
 					{title}
 				</h3>
-				<p className="text-xs sm:text-sm text-muted-foreground line-clamp-2 sm:line-clamp-2">
+				<p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">
 					{description}
 				</p>
 				<div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs text-muted-foreground mt-auto">

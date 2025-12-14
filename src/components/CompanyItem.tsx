@@ -3,16 +3,13 @@ import { FC } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
+import { getCompanyColor } from '@/lib/color';
+import { formatPrice } from '@/lib/format';
 import { cn } from '@/lib/utils';
-import {
-	getSentimentColor,
-	getSentimentLabel,
-	getStockImageUrl,
-} from '@/lib/values';
+import { getSentimentColor, getStockImageUrl } from '@/lib/values';
 import { Company } from '@/types/company';
 
 interface Props extends Company {
-	price?: string;
 	showSentiment?: boolean;
 }
 
@@ -27,6 +24,9 @@ const CompanyItem: FC<Props> = ({
 	showSentiment = false,
 }) => {
 	const stockImageUrl = getStockImageUrl(companyId, isDomestic);
+	const shouldShowInitial = !isListed && isDomestic && !stockImageUrl;
+	const initialLetter = name.charAt(0).toUpperCase();
+	const backgroundColor = shouldShowInitial ? getCompanyColor(name) : undefined;
 
 	const content = (
 		<div
@@ -40,8 +40,15 @@ const CompanyItem: FC<Props> = ({
 			<div className="flex items-start gap-2 sm:gap-3">
 				{/* 로고 */}
 				<div className="shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-lg flex items-center justify-center border border-border overflow-hidden">
-					{stockImageUrl &&
-						(isDomestic ? (
+					{shouldShowInitial ? (
+						<div
+							className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-white font-semibold text-sm sm:text-base"
+							style={{ backgroundColor }}
+						>
+							{initialLetter}
+						</div>
+					) : (
+						stockImageUrl && (
 							<Image
 								src={stockImageUrl}
 								alt={name}
@@ -49,17 +56,8 @@ const CompanyItem: FC<Props> = ({
 								height={48}
 								className="object-contain w-full h-full"
 							/>
-						) : (
-							<Image
-								src={stockImageUrl}
-								alt={name}
-								width={32}
-								height={32}
-								className="object-contain w-full h-full"
-								unoptimized
-								preload
-							/>
-						))}
+						)
+					)}
 				</div>
 
 				{/* 회사 정보 */}
@@ -77,9 +75,9 @@ const CompanyItem: FC<Props> = ({
 							</span>
 						)}
 					</div>
-					{price && (
+					{price !== -1 && (
 						<div className="text-xs sm:text-sm text-muted-foreground mt-0.5 sm:mt-1">
-							{price}
+							{formatPrice(price)}
 						</div>
 					)}
 				</div>
@@ -93,7 +91,7 @@ const CompanyItem: FC<Props> = ({
 						)}
 						type="button"
 					>
-						{getSentimentLabel(sentiment)}
+						{sentiment}
 					</button>
 				)}
 			</div>

@@ -56,6 +56,7 @@ const CompanyDetailClientContainer: FC<Props> = ({ companyId }) => {
 			{ id: 1, label: '반도체' },
 			{ id: 2, label: 'AI' },
 		],
+		price: 100000,
 		related: [
 			{
 				companyId: '055550',
@@ -64,6 +65,7 @@ const CompanyDetailClientContainer: FC<Props> = ({ companyId }) => {
 				isDomestic: true,
 				sentiment: 'positive',
 				tags: [{ id: 3, label: '금융' }],
+				price: 100000,
 			},
 			{
 				companyId: '035720',
@@ -72,6 +74,7 @@ const CompanyDetailClientContainer: FC<Props> = ({ companyId }) => {
 				isDomestic: true,
 				sentiment: 'slightlyPositive',
 				tags: [{ id: 4, label: '플랫폼' }],
+				price: 100000,
 			},
 			{
 				companyId: '035420',
@@ -80,6 +83,7 @@ const CompanyDetailClientContainer: FC<Props> = ({ companyId }) => {
 				isDomestic: true,
 				sentiment: 'neutral',
 				tags: [{ id: 5, label: '플랫폼' }],
+				price: 100000,
 			},
 		],
 	};
@@ -366,6 +370,7 @@ const CompanyDetailClient: FC<CompanyDetailClientProps> = ({
 									sentiment={company.sentiment as Sentiment}
 									tags={company.tags}
 									showSentiment={false}
+									price={company.price}
 								/>
 							))}
 						</div>
@@ -526,6 +531,7 @@ const CompanyDetailClient: FC<CompanyDetailClientProps> = ({
 										sentiment={company.sentiment as Sentiment}
 										tags={company.tags}
 										showSentiment={false}
+										price={company.price}
 									/>
 								))}
 							</div>

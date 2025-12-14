@@ -1,23 +1,17 @@
-import {
-	dehydrate,
-	HydrationBoundary,
-	QueryClient,
-} from '@tanstack/react-query';
-
+import { getYesterdayDateString } from '@/lib/format';
 import { getNewsByDate } from '@/service/news';
 
 import HomeClientContainer from './Home.client';
 
 const HomeContainer = async () => {
-	const queryClient = new QueryClient();
-	await queryClient.prefetchQuery({
-		queryKey: ['news', '2025-11-30'],
-		queryFn: () => getNewsByDate('2025-11-30'),
-	});
-	return (
-		<HydrationBoundary state={dehydrate(queryClient)}>
-			<HomeClientContainer />
-		</HydrationBoundary>
-	);
+	const yesterdayString = getYesterdayDateString();
+	console.log(yesterdayString);
+	const newsData = await getNewsByDate('2025-12-14');
+
+	if (newsData.length === 0) {
+		return <div>No news data</div>;
+	}
+
+	return <HomeClientContainer newsData={newsData} />;
 };
 export default HomeContainer;
