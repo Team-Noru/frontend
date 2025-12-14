@@ -17,6 +17,7 @@ export interface Company {
 	isDomestic: boolean;
 	sentiment?: Sentiment;
 	tags?: Tag[];
+	price: number;
 }
 
 export interface CompanyDetailData extends Company {

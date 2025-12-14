@@ -2,6 +2,7 @@ import { ApiResponse } from '@/types/api';
 import { Announcement } from '@/types/company';
 import { News } from '@/types/news';
 
+// const CLIENT_API_URL = `${process.env.NEXT_PUBLIC_API_URL}/companies`;
 const API_URL = `${process.env.SERVICE_URL}/companies`;
 
 export const getCompanyNewsById = async (companyId: string) => {

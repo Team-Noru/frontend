@@ -25,3 +25,38 @@ export const formatDateToYYYYMMDD = (dateInput: string): string => {
 	const day = String(parsedDate.getDate()).padStart(2, '0');
 	return `${year}-${month}-${day}`;
 };
+
+// 전날 날짜를 YYYY-MM-DD 형식으로 반환 (뉴스 스케줄링에 사용)
+export const getYesterdayDateString = (): string => {
+	const yesterday = new Date();
+	yesterday.setDate(yesterday.getDate() - 1);
+	const year = yesterday.getFullYear();
+	const month = String(yesterday.getMonth() + 1).padStart(2, '0');
+	const day = String(yesterday.getDate()).padStart(2, '0');
+	return `${year}-${month}-${day}`;
+};
+
+// 가격 포맷팅 함수
+export const formatPrice = (
+	priceValue: string | number | undefined
+): string => {
+	if (!priceValue) return '';
+	const numPrice =
+		typeof priceValue === 'string' ? parseFloat(priceValue) : priceValue;
+	if (isNaN(numPrice)) return '';
+	return `${numPrice.toLocaleString('ko-KR')}원`;
+};
+
+// 날짜 포맷팅 (2025-11-30 -> May 31, 2023 형식으로 변환)
+export const formatDate = (dateString: string) => {
+	try {
+		const date = new Date(dateString);
+		return date.toLocaleDateString('en-US', {
+			year: 'numeric',
+			month: 'short',
+			day: 'numeric',
+		});
+	} catch {
+		return dateString;
+	}
+};

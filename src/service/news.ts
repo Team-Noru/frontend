@@ -2,7 +2,8 @@ import { formatDateToYYYYMMDD } from '@/lib/format';
 import { ApiResponse } from '@/types/api';
 import { News, NewsDetail } from '@/types/news';
 
-const API_URL = `${process.env.SERVICE_URL}/news`;
+const API_URL = `${process.env.NEXT_PUBLIC_SERVICE_URL}/news`;
+// const CLIENT_API_URL = `${process.env.NEXT_PUBLIC_API_URL}/news`;
 
 export const getNewsByDate = async (date: string) => {
 	const formattedDate = formatDateToYYYYMMDD(date);
@@ -11,6 +12,9 @@ export const getNewsByDate = async (date: string) => {
 			method: 'GET',
 			headers: {
 				'Content-Type': 'application/json',
+			},
+			next: {
+				revalidate: 60 * 15,
 			},
 		});
 
@@ -40,9 +44,9 @@ export const getNewsDetailById = async (newsId: number) => {
 		}
 
 		const data: ApiResponse<NewsDetail> = await response.json();
-		return data.data;
+		return data.data ?? null;
 	} catch (error) {
 		console.error(error);
-		return undefined;
+		return null;
 	}
 };

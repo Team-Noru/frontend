@@ -7,23 +7,14 @@ import Image from 'next/image';
 import CompanyItem from '@/components/CompanyItem';
 import MobileHeader from '@/components/ui/MobileHeader';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useGetNewsDetailById } from '@/hooks/api/news/useGetNewsDetailById';
+import { NewsDetail } from '@/types/news';
 
 interface Props {
-	newsId: number;
+	newsData: NewsDetail;
 }
 
-const NewsDetailClient: FC<Props> = ({ newsId }) => {
-	const { data: newsData, isLoading } = useGetNewsDetailById(newsId);
+const NewsDetailClient: FC<Props> = ({ newsData }) => {
 	const [activeTab, setActiveTab] = useState('article');
-
-	if (isLoading) {
-		return <div>Loading...</div>;
-	}
-
-	if (!newsData) {
-		return <div>News not found</div>;
-	}
 
 	return (
 		<div className="w-full h-full bg-white overflow-auto">
@@ -56,30 +47,83 @@ const NewsDetailClient: FC<Props> = ({ newsId }) => {
 									</span>
 								</div>
 							</header>
-
-							{/* 썸네일 */}
-							{newsData.thumbnailUrl ? (
-								<div className="relative w-full h-48 sm:h-64 md:h-96 bg-muted rounded-lg overflow-hidden">
-									<Image
-										src={newsData.thumbnailUrl}
-										alt={newsData.title}
-										fill
-										className="object-cover"
-									/>
-								</div>
-							) : (
-								<div className="w-full h-48 sm:h-64 md:h-96 bg-muted rounded-lg flex items-center justify-center">
-									<span className="text-muted-foreground text-sm sm:text-base">
-										이미지
-									</span>
-								</div>
-							)}
-
 							{/* 본문 */}
-							<div className="prose prose-sm sm:prose-base md:prose-lg max-w-none">
-								<p className="text-sm sm:text-base leading-6 sm:leading-7 whitespace-pre-line">
-									{newsData.content}
-								</p>
+							<div className="prose prose-sm sm:prose-base md:prose-lg max-w-none space-y-4">
+								{newsData.content
+									.split(/\[IMG\]/)
+									.flatMap((segment, index, segments) => {
+										const result = [];
+										const isAfterImage =
+											index > 0 && newsData.imageUrl[index - 1];
+
+										// 텍스트 segment 렌더링
+										if (segment.trim()) {
+											// 이미지 다음 segment면 첫 번째 줄만 caption으로 처리
+											if (isAfterImage) {
+												const lines = segment.split('\n');
+												const firstLine = lines[0]?.trim();
+												const restLines = lines.slice(1).join('\n').trim();
+
+												if (firstLine) {
+													result.push(
+														<p
+															key={`caption-${index}`}
+															className="text-xs sm:text-sm text-muted-foreground text-center italic mt-2 mb-3"
+														>
+															{firstLine}
+														</p>
+													);
+												}
+
+												if (restLines) {
+													result.push(
+														<p
+															key={`text-${index}`}
+															className="text-sm sm:text-base leading-6 sm:leading-7 whitespace-pre-line"
+														>
+															{restLines}
+														</p>
+													);
+												}
+											} else {
+												result.push(
+													<p
+														key={`text-${index}`}
+														className="text-sm sm:text-base leading-6 sm:leading-7 whitespace-pre-line"
+													>
+														{segment}
+													</p>
+												);
+											}
+										}
+
+										// 해당 위치에 이미지 삽입
+										// 첫 번째 [IMG]면 imageUrl[0], 두 번째 [IMG]면 imageUrl[1] ...
+										// 마지막 segment가 아니면 이미지 삽입
+										// 또는 마지막 segment가 빈 문자열이면 이미지 삽입 (맨 뒤 [IMG] 처리)
+										if (
+											newsData.imageUrl[index] &&
+											(index < segments.length - 1 || !segment.trim())
+										) {
+											result.push(
+												<div
+													key={`img-${index}`}
+													className="w-full mt-6 mb-2 flex justify-center"
+												>
+													<Image
+														src={newsData.imageUrl[index]}
+														alt={`${newsData.title} - 이미지 ${index + 1}`}
+														width={1200}
+														height={800}
+														className="max-w-full h-auto max-h-[400px] sm:max-h-[500px] md:max-h-[600px]"
+														sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 1280px"
+													/>
+												</div>
+											);
+										}
+
+										return result;
+									})}
 							</div>
 						</article>
 					</div>
@@ -91,7 +135,7 @@ const NewsDetailClient: FC<Props> = ({ newsId }) => {
 							<div className="space-y-3">
 								{newsData.companies.map((company) => (
 									<CompanyItem
-										key={company.companyId}
+										key={`${company.companyId || ''}-${company.name}`}
 										companyId={company.companyId}
 										name={company.name}
 										isListed={company.isListed}
@@ -99,6 +143,7 @@ const NewsDetailClient: FC<Props> = ({ newsId }) => {
 										sentiment={company.sentiment}
 										tags={company.tags}
 										showSentiment={true}
+										price={company.price}
 									/>
 								))}
 							</div>
@@ -137,30 +182,82 @@ const NewsDetailClient: FC<Props> = ({ newsId }) => {
 										</span>
 									</div>
 								</header>
-
-								{/* 썸네일 */}
-								{newsData.thumbnailUrl ? (
-									<div className="relative w-full h-48 sm:h-64 bg-muted rounded-lg overflow-hidden">
-										<Image
-											src={newsData.thumbnailUrl}
-											alt={newsData.title}
-											fill
-											className="object-cover"
-										/>
-									</div>
-								) : (
-									<div className="w-full h-48 sm:h-64 bg-muted rounded-lg flex items-center justify-center">
-										<span className="text-muted-foreground text-sm sm:text-base">
-											이미지
-										</span>
-									</div>
-								)}
-
 								{/* 본문 */}
-								<div className="prose prose-sm sm:prose-base max-w-none">
-									<p className="text-sm sm:text-base leading-6 sm:leading-7 whitespace-pre-line">
-										{newsData.content}
-									</p>
+								<div className="prose prose-sm sm:prose-base max-w-none space-y-4">
+									{newsData.content
+										.split(/\[IMG\]/)
+										.flatMap((segment, index, segments) => {
+											const result = [];
+											const isAfterImage =
+												index > 0 && newsData.imageUrl[index - 1];
+
+											// 텍스트 segment 렌더링
+											if (segment.trim()) {
+												// 이미지 다음 segment면 첫 번째 줄만 caption으로 처리
+												if (isAfterImage) {
+													const lines = segment.split('\n');
+													const firstLine = lines[0]?.trim();
+													const restLines = lines.slice(1).join('\n').trim();
+
+													if (firstLine) {
+														result.push(
+															<p
+																key={`caption-${index}`}
+																className="text-xs sm:text-sm text-muted-foreground text-center italic mt-2 mb-3"
+															>
+																{firstLine}
+															</p>
+														);
+													}
+
+													if (restLines) {
+														result.push(
+															<p
+																key={`text-${index}`}
+																className="text-sm sm:text-base leading-6 sm:leading-7 whitespace-pre-line"
+															>
+																{restLines}
+															</p>
+														);
+													}
+												} else {
+													result.push(
+														<p
+															key={`text-${index}`}
+															className="text-sm sm:text-base leading-6 sm:leading-7 whitespace-pre-line"
+														>
+															{segment}
+														</p>
+													);
+												}
+											}
+
+											// 해당 위치에 이미지 삽입
+											// 마지막 segment가 아니면 이미지 삽입
+											// 또는 마지막 segment가 빈 문자열이고 이미지가 있으면 이미지 삽입 (마지막 [IMG] 처리)
+											if (
+												newsData.imageUrl[index] &&
+												(index < segments.length - 1 || !segment.trim())
+											) {
+												result.push(
+													<div
+														key={`img-${index}`}
+														className="w-full mt-6 mb-2 flex justify-center"
+													>
+														<Image
+															src={newsData.imageUrl[index]}
+															alt={`${newsData.title} - 이미지 ${index + 1}`}
+															width={1200}
+															height={800}
+															className="max-w-full h-auto max-h-[300px] sm:max-h-[400px]"
+															sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 1280px"
+														/>
+													</div>
+												);
+											}
+
+											return result;
+										})}
 								</div>
 							</article>
 						</TabsContent>
@@ -168,7 +265,7 @@ const NewsDetailClient: FC<Props> = ({ newsId }) => {
 							<div className="space-y-3">
 								{newsData.companies.map((company) => (
 									<CompanyItem
-										key={company.companyId}
+										key={`${company.companyId || ''}-${company.name}`}
 										companyId={company.companyId}
 										name={company.name}
 										isListed={company.isListed}
@@ -176,6 +273,7 @@ const NewsDetailClient: FC<Props> = ({ newsId }) => {
 										sentiment={company.sentiment}
 										tags={company.tags}
 										showSentiment={true}
+										price={company.price}
 									/>
 								))}
 							</div>
