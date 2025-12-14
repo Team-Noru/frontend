@@ -1,5 +1,6 @@
 import localFont from 'next/font/local';
 
+import Header from '@/components/Header';
 import QueryClientProvider from '@/components/providers/QueryClientProvider';
 
 import type { Metadata } from 'next';
@@ -14,8 +15,16 @@ const pretendard = localFont({
 });
 
 export const metadata: Metadata = {
-	title: 'TEAM NORU',
-	description: 'NORU NORU',
+	title: 'LINKompany',
+	description: '기업과 기업을 연결하고 탐색하는 LINKompany',
+	openGraph: {
+		title: 'LINKompany',
+		description: '기업과 기업을 연결하고 탐색하는 LINKompany',
+		images: '/og-image.png',
+		siteName: 'LINKompany',
+		locale: 'ko_KR',
+		type: 'website',
+	},
 };
 
 export default function RootLayout({
@@ -26,9 +35,12 @@ export default function RootLayout({
 	return (
 		<html lang="en">
 			<body
-				className={`${pretendard.className} antialiased flex w-dvw h-dvh overflow-hidden bg-custom-gray-bg`}
+				className={`${pretendard.className} antialiased flex flex-col w-dvw h-dvh overflow-hidden bg-custom-gray-bg`}
 			>
-				<QueryClientProvider>{children}</QueryClientProvider>
+				<QueryClientProvider>
+					<Header />
+					<div className="flex-1 overflow-hidden">{children}</div>
+				</QueryClientProvider>
 			</body>
 		</html>
 	);

@@ -23,7 +23,6 @@ const CompanyItem: FC<Props> = ({
 	price,
 	showSentiment = false,
 }) => {
-	console.log(companyId, name, isListed, sentiment, isDomestic, tags, price);
 	const stockImageUrl = getStockImageUrl(companyId, isDomestic);
 	const shouldShowInitial = !isListed && isDomestic && !stockImageUrl;
 	const initialLetter = name.charAt(0).toUpperCase();
@@ -65,11 +64,6 @@ const CompanyItem: FC<Props> = ({
 				<div className="flex-1 min-w-0">
 					<div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
 						<div className="font-medium text-sm sm:text-base">{name}</div>
-						{isListed !== undefined && (
-							<span className="text-xs text-muted-foreground">
-								{isListed ? '상장' : '비상장'}
-							</span>
-						)}
 						{companyId && (
 							<span className="text-xs text-muted-foreground">
 								({companyId})
@@ -103,7 +97,7 @@ const CompanyItem: FC<Props> = ({
 					{tags.map((tag) => (
 						<span
 							key={`${companyId}-${tag.label}`}
-							className="px-2 py-0.5 sm:py-1 text-xs bg-secondary text-secondary-foreground rounded-md"
+							className="px-2 py-0.5 sm:py-1 text-xs bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-md font-medium"
 						>
 							{tag.label}
 						</span>

@@ -12,7 +12,6 @@ import { GraphEdge, GraphNode } from 'reagraph';
 
 import CompanyItem from '@/components/CompanyItem';
 import NewsItem from '@/components/NewsItem';
-import MobileHeader from '@/components/ui/MobileHeader';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { getStockImageUrl } from '@/lib/values';
 import {
@@ -103,7 +102,6 @@ const CompanyDetailClientContainer: FC<Props> = ({
 
 	return (
 		<div className="w-full h-full bg-white overflow-auto">
-			<MobileHeader fallbackUrl="/" />
 			<div className="max-w-7xl mx-auto p-4 sm:p-6 md:p-8">
 				{/* 헤더 */}
 				<div className="mb-4 sm:mb-6">
@@ -140,6 +138,8 @@ const CompanyDetailClientContainer: FC<Props> = ({
 				<div className="hidden lg:flex flex-row gap-8">
 					{/* 메인 콘텐츠 영역 */}
 					<div className="flex-1 space-y-6">
+						{/* 기업 정보 제목 */}
+						<h2 className="text-2xl font-bold">기업 정보</h2>
 						{/* 네트워크 그래프 */}
 						<div className="h-[600px] w-full border border-border rounded-lg overflow-hidden bg-white relative">
 							<GraphCanvas
@@ -274,22 +274,26 @@ const CompanyDetailClientContainer: FC<Props> = ({
 					</div>
 
 					{/* 우측 사이드바 */}
-					<div className="w-80 shrink-0 space-y-4">
-						{/* 기업 목록 */}
-						<div className="space-y-3">
-							{companyData.related.map((company) => (
-								<CompanyItem
-									key={`${company.companyId || ''}-${company.name}`}
-									companyId={company.companyId}
-									name={company.name}
-									isListed={company.isListed}
-									isDomestic={company.isDomestic}
-									sentiment={company.sentiment as Sentiment}
-									tags={company.tags}
-									showSentiment={false}
-									price={company.price}
-								/>
-							))}
+					<div className="w-80 shrink-0">
+						<div className="sticky top-8 space-y-4">
+							{/* 연관 기업 제목 */}
+							<h2 className="text-2xl font-bold mb-4">연관 기업</h2>
+							{/* 기업 목록 */}
+							<div className="space-y-3">
+								{companyData.related.map((company) => (
+									<CompanyItem
+										key={`${company.companyId || ''}-${company.name}`}
+										companyId={company.companyId}
+										name={company.name}
+										isListed={company.isListed}
+										isDomestic={company.isDomestic}
+										sentiment={company.sentiment as Sentiment}
+										tags={company.tags}
+										showSentiment={false}
+										price={company.price}
+									/>
+								))}
+							</div>
 						</div>
 					</div>
 				</div>

@@ -23,7 +23,6 @@ const CompanyDetailContainer: FC<Props> = async ({ params }) => {
 		await getCompanyNewsById(companyId),
 		await getCompanyAnnouncementsById(companyId),
 	]);
-	console.log(companyData);
 
 	const wordCloudData: WordData[] = [
 		{ text: '미국', value: 150 },

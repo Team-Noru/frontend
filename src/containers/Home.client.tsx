@@ -5,67 +5,27 @@ import { useState } from 'react';
 import CompanyItem from '@/components/CompanyItem';
 import NewsItem from '@/components/NewsItem';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Sentiment } from '@/types/company';
+import { Company, Sentiment } from '@/types/company';
 import { News } from '@/types/news';
 
 interface Props {
 	newsData: News[];
+	companies: Company[];
 }
 
-const HomeClientContainer: React.FC<Props> = ({ newsData }) => {
+const HomeClientContainer: React.FC<Props> = ({ newsData, companies }) => {
 	const [activeTab, setActiveTab] = useState('news');
-
-	const companies = [
-		{
-			companyId: '055550',
-			name: '신한지주',
-			isListed: true,
-			isDomestic: true,
-			sentiment: 'positive',
-			tags: [],
-			price: 100000,
-		},
-		{
-			companyId: 'GOOGL',
-			name: '알파벳 A',
-			isListed: false,
-			isDomestic: false,
-			sentiment: 'positive',
-			tags: [],
-			price: 100000,
-		},
-		{
-			companyId: '005930',
-			name: '삼성전자',
-			isListed: true,
-			isDomestic: true,
-			sentiment: 'positive',
-			tags: [],
-			price: 100000,
-		},
-		{
-			companyId: '035420',
-			name: '네이버',
-			isListed: true,
-			isDomestic: true,
-			sentiment: 'positive',
-			tags: [],
-			price: 100000,
-		},
-	];
 
 	return (
 		<div className="w-full h-full bg-white overflow-auto">
 			<div className="max-w-7xl mx-auto p-4 sm:p-6 md:p-8">
-				{/* 헤더 */}
-				<h1 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8">
-					서비스이름
-				</h1>
-
 				{/* 데스크톱 레이아웃 */}
 				<div className="hidden lg:flex flex-row gap-8">
 					{/* 왼쪽: 뉴스 목록 */}
 					<div className="flex-1">
+						<h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">
+							오늘의 뉴스
+						</h2>
 						<div className="space-y-2">
 							{newsData?.map((news) => (
 								<NewsItem
@@ -83,23 +43,25 @@ const HomeClientContainer: React.FC<Props> = ({ newsData }) => {
 
 					{/* 오른쪽: 기업 목록 */}
 					<div className="w-80 shrink-0">
-						<h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">
-							기업 목록
-						</h2>
-						<div className="space-y-3">
-							{companies.map((company) => (
-								<CompanyItem
-									key={`${company.companyId || ''}-${company.name}`}
-									companyId={company.companyId}
-									name={company.name}
-									isListed={company.isListed}
-									isDomestic={company.isDomestic}
-									sentiment={company.sentiment as Sentiment}
-									tags={company.tags}
-									showSentiment={false}
-									price={company.price}
-								/>
-							))}
+						<div className="sticky top-8">
+							<h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">
+								기업 목록
+							</h2>
+							<div className="space-y-3">
+								{companies.map((company) => (
+									<CompanyItem
+										key={`${company.companyId || ''}-${company.name}`}
+										companyId={company.companyId}
+										name={company.name}
+										isListed={company.isListed}
+										isDomestic={company.isDomestic}
+										sentiment={company.sentiment as Sentiment}
+										tags={company.tags}
+										showSentiment={false}
+										price={company.price}
+									/>
+								))}
+							</div>
 						</div>
 					</div>
 				</div>
@@ -108,7 +70,7 @@ const HomeClientContainer: React.FC<Props> = ({ newsData }) => {
 				<div className="lg:hidden">
 					<Tabs value={activeTab} onValueChange={setActiveTab}>
 						<TabsList>
-							<TabsTrigger value="news">뉴스 목록</TabsTrigger>
+							<TabsTrigger value="news">오늘의 뉴스</TabsTrigger>
 							<TabsTrigger value="companies">기업 목록</TabsTrigger>
 						</TabsList>
 						<TabsContent value="news" className="mt-6">

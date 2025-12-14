@@ -17,7 +17,9 @@ export interface Company {
 	isDomestic: boolean;
 	sentiment?: Sentiment;
 	tags?: Tag[];
-	price: number;
+	price?: number;
+	diffPrice?: number;
+	diffRate?: number;
 }
 
 export interface CompanyDetail extends Company {
@@ -36,4 +38,12 @@ export interface Announcement {
 export interface WordData {
 	text: string;
 	value: number;
+}
+
+export interface CompanyPriceDTO {
+	companyId: string;
+	name: string;
+	price: number;
+	diffPrice: number;
+	diffRate: number;
 }

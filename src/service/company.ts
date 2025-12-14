@@ -1,8 +1,13 @@
+import { shuffleSort } from '@/lib/sort';
 import { ApiResponse } from '@/types/api';
-import { Announcement, CompanyDetail } from '@/types/company';
+import {
+	Announcement,
+	Company,
+	CompanyDetail,
+	CompanyPriceDTO,
+} from '@/types/company';
 import { News } from '@/types/news';
 
-// const CLIENT_API_URL = `${process.env.NEXT_PUBLIC_API_URL}/companies`;
 const API_URL = `${process.env.SERVICE_URL}/companies`;
 
 export const getCompanyNewsById = async (companyId: string) => {
@@ -65,5 +70,42 @@ export const getCompanyDetailById = async (companyId: string) => {
 	} catch (error) {
 		console.error(error);
 		return null;
+	}
+};
+
+export const getHomeCompanies = async (): Promise<Company[]> => {
+	try {
+		const response = await fetch(`${API_URL}/price`, {
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			next: {
+				revalidate: 60,
+			},
+		});
+
+		if (!response.ok) {
+			throw new Error('Failed to fetch home companies');
+		}
+
+		const data: CompanyPriceDTO[] = await response.json();
+
+		return shuffleSort(
+			data.map((company: CompanyPriceDTO) => ({
+				companyId: company.companyId,
+				name: company.name,
+				isListed: true,
+				isDomestic: true,
+				sentiment: 'neutral',
+				tags: [],
+				price: company.price,
+				diffPrice: company.diffPrice,
+				diffRate: company.diffRate,
+			}))
+		).slice(0, 5) as Company[];
+	} catch (error) {
+		console.error(error);
+		return [];
 	}
 };
