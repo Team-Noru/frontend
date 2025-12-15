@@ -5,6 +5,13 @@ RUN npm install -g pnpm
 COPY package.json pnpm-lock.yaml* ./
 RUN pnpm install --frozen-lockfile
 COPY . .
+
+# 빌드 타임 환경변수 (Jenkins에서 --build-arg로 전달)
+ARG SERVICE_URL
+ARG NEXT_PUBLIC_SERVICE_URL
+ENV SERVICE_URL=$SERVICE_URL
+ENV NEXT_PUBLIC_SERVICE_URL=$NEXT_PUBLIC_SERVICE_URL
+
 RUN pnpm run build
 
 # Stage 2: Runner
@@ -20,9 +27,6 @@ RUN pnpm install --prod --frozen-lockfile --ignore-scripts
 
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next ./.next
-# COPY --from=builder /app/.env.production ./.env.production
-# COPY --from=builder /app/src/middleware.ts ./src/middleware.ts
-COPY --from=builder /app/next.config.ts ./next.config.ts
 
 EXPOSE 3000
 CMD ["pnpm", "start"]
