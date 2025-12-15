@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, useMemo } from 'react';
 
 import Image from 'next/image';
 import Link from 'next/link';
@@ -7,7 +7,7 @@ import { getCompanyColor } from '@/lib/color';
 import { formatPrice } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { getSentimentColor, getStockImageUrl } from '@/lib/values';
-import { Company } from '@/types/company';
+import { Company, Tag } from '@/types/company';
 
 interface Props extends Company {
 	showSentiment?: boolean;
@@ -27,6 +27,27 @@ const CompanyItem: FC<Props> = ({
 	const shouldShowInitial = !isListed && isDomestic && !stockImageUrl;
 	const initialLetter = name.charAt(0).toUpperCase();
 	const backgroundColor = shouldShowInitial ? getCompanyColor(name) : undefined;
+
+	// 태그를 label 기준으로 그룹화하고 relReason 수집
+	const groupedTags = useMemo(() => {
+		const tagMap = new Map<string, { tag: Tag; relReasons: string[] }>();
+		tags.forEach((tag) => {
+			const existing = tagMap.get(tag.label);
+			if (existing) {
+				// 중복된 label이 있으면 relReason만 추가
+				if (!existing.relReasons.includes(tag.relReason)) {
+					existing.relReasons.push(tag.relReason);
+				}
+			} else {
+				// 새로운 label이면 새로 추가
+				tagMap.set(tag.label, {
+					tag,
+					relReasons: [tag.relReason],
+				});
+			}
+		});
+		return Array.from(tagMap.values());
+	}, [tags]);
 
 	const content = (
 		<div
@@ -48,7 +69,8 @@ const CompanyItem: FC<Props> = ({
 							{initialLetter}
 						</div>
 					) : (
-						stockImageUrl && (
+						stockImageUrl &&
+						(isDomestic ? (
 							<Image
 								src={stockImageUrl}
 								alt={name}
@@ -56,7 +78,17 @@ const CompanyItem: FC<Props> = ({
 								height={48}
 								className="object-contain w-full h-full"
 							/>
-						)
+						) : (
+							<Image
+								src={stockImageUrl}
+								alt={name}
+								width={48}
+								height={48}
+								unoptimized
+								preload
+								className="object-contain w-full h-full"
+							/>
+						))
 					)}
 				</div>
 
@@ -92,16 +124,27 @@ const CompanyItem: FC<Props> = ({
 			</div>
 
 			{/* Tags */}
-			{tags && tags.length > 0 && (
+			{groupedTags && groupedTags.length > 0 && (
 				<div className="flex flex-wrap gap-1.5 sm:gap-2 mt-0.5 sm:mt-1">
-					{tags.map((tag) => (
-						<span
-							key={`${companyId}-${tag.label}`}
-							className="px-2 py-0.5 sm:py-1 text-xs bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-md font-medium"
-						>
-							{tag.label}
-						</span>
-					))}
+					{groupedTags.map(({ tag, relReasons }) => {
+						const tooltipText = relReasons
+							.map((reason) => `- ${reason}`)
+							.join('\n');
+						return (
+							<span
+								key={`${companyId}-${tag.label}-${tag.id}`}
+								className="relative group px-2 py-0.5 sm:py-1 text-xs bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-md font-medium cursor-help"
+							>
+								{tag.label}
+								{tooltipText && (
+									<span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1.5 text-xs text-white bg-gray-900 dark:bg-gray-800 rounded-md whitespace-pre-line opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity z-50 w-[250px] text-left shadow-lg pointer-events-none">
+										{tooltipText}
+										<span className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900 dark:border-t-gray-800"></span>
+									</span>
+								)}
+							</span>
+						);
+					})}
 				</div>
 			)}
 		</div>

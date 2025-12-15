@@ -1,10 +1,9 @@
-import { shuffleSort } from '@/lib/sort';
 import { ApiResponse } from '@/types/api';
 import {
 	Announcement,
-	Company,
 	CompanyDetail,
 	CompanyPriceDTO,
+	CompanyWordCloud,
 } from '@/types/company';
 import { News } from '@/types/news';
 
@@ -73,7 +72,7 @@ export const getCompanyDetailById = async (companyId: string) => {
 	}
 };
 
-export const getHomeCompanies = async (): Promise<Company[]> => {
+export const getHomeCompanies = async () => {
 	try {
 		const response = await fetch(`${API_URL}/price`, {
 			method: 'GET',
@@ -89,23 +88,35 @@ export const getHomeCompanies = async (): Promise<Company[]> => {
 			throw new Error('Failed to fetch home companies');
 		}
 
-		const data: CompanyPriceDTO[] = await response.json();
+		const data: ApiResponse<CompanyPriceDTO[]> = await response.json();
 
-		return shuffleSort(
-			data.map((company: CompanyPriceDTO) => ({
-				companyId: company.companyId,
-				name: company.name,
-				isListed: true,
-				isDomestic: true,
-				sentiment: 'neutral',
-				tags: [],
-				price: company.price,
-				diffPrice: company.diffPrice,
-				diffRate: company.diffRate,
-			}))
-		).slice(0, 5) as Company[];
+		return data.data;
 	} catch (error) {
 		console.error(error);
 		return [];
+	}
+};
+
+export const getCompanyWordCloudById = async (companyId: string) => {
+	try {
+		const response = await fetch(`${API_URL}/${companyId}/wordCloud`, {
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+		});
+
+		if (!response.ok) {
+			throw new Error('Failed to fetch company word cloud');
+		}
+
+		const data: ApiResponse<CompanyWordCloud> = await response.json();
+		return data.data;
+	} catch (error) {
+		console.error(error);
+		return {
+			companyId: companyId,
+			wordList: [],
+		};
 	}
 };
