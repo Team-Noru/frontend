@@ -14,7 +14,9 @@ import CompanyItem from '@/components/CompanyItem';
 import NewsItem from '@/components/NewsItem';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { getColorByType } from '@/lib/color';
+import { formatPrice } from '@/lib/format';
 import { sortCompanies } from '@/lib/sort';
+import { cn } from '@/lib/utils';
 import { getLabelByType, getStockImageUrl } from '@/lib/values';
 import {
 	Announcement,
@@ -235,9 +237,40 @@ const CompanyDetailClientContainer: FC<Props> = ({
 										/>
 									</div>
 								)}
-							<h2 className="text-lg sm:text-xl md:text-2xl font-bold">
-								{companyData.name}
-							</h2>
+							<div className="flex flex-col gap-1">
+								<h2 className="text-lg sm:text-xl md:text-2xl font-bold">
+									{companyData.name}
+								</h2>
+								{companyData.price !== undefined &&
+									companyData.price !== -1 && (
+										<div className="flex items-center gap-1.5 sm:gap-2">
+											<span className="text-xs sm:text-sm text-muted-foreground">
+												{formatPrice(companyData.price)}
+											</span>
+											{companyData.diffPrice !== undefined &&
+												companyData.diffRate !== undefined && (
+													<span
+														className={cn(
+															'text-xs sm:text-sm font-medium flex items-center gap-0.5',
+															companyData.diffPrice > 0
+																? 'text-red-600 dark:text-red-400'
+																: companyData.diffPrice < 0
+																	? 'text-blue-600 dark:text-blue-400'
+																	: 'text-gray-500 dark:text-gray-400'
+														)}
+													>
+														<span>
+															{companyData.diffPrice === 0
+																? '-'
+																: `${companyData.diffPrice > 0 ? '' : '-'}${formatPrice(
+																		Math.abs(companyData.diffPrice)
+																	)}(${companyData.diffPrice > 0 ? '+' : ''}${companyData.diffRate.toFixed(2)}%)`}
+														</span>
+													</span>
+												)}
+										</div>
+									)}
+							</div>
 						</div>
 					</div>
 				</div>
