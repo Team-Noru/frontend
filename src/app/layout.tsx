@@ -17,6 +17,7 @@ const pretendard = localFont({
 export const metadata: Metadata = {
 	title: 'LINKompany',
 	description: '기업과 기업을 연결하고 탐색하는 LINKompany',
+	metadataBase: new URL('https://noru.panghae.site'),
 	openGraph: {
 		title: 'LINKompany',
 		description: '기업과 기업을 연결하고 탐색하는 LINKompany',
