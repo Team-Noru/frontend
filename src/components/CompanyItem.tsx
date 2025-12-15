@@ -25,6 +25,8 @@ const CompanyItem: FC<Props> = ({
 	tags = [],
 	price,
 	showSentiment = false,
+	diffPrice,
+	diffRate,
 }) => {
 	const stockImageUrl = getStockImageUrl(companyId, isDomestic);
 	// isDomestic이 false이거나, (isListed가 false이고 isDomestic이 true이지만 stockImageUrl이 없는 경우) 초기 표시
@@ -114,8 +116,30 @@ const CompanyItem: FC<Props> = ({
 						)}
 					</div>
 					{price !== -1 && (
-						<div className="text-xs sm:text-sm text-muted-foreground mt-0.5 sm:mt-1">
-							{formatPrice(price)}
+						<div className="flex items-center gap-1.5 sm:gap-2 mt-0.5 sm:mt-1">
+							<span className="text-[10px] sm:text-xs text-muted-foreground">
+								{formatPrice(price)}
+							</span>
+							{diffPrice !== undefined && diffRate !== undefined && (
+								<span
+									className={cn(
+										'text-[10px] sm:text-xs font-medium flex items-center gap-0.5',
+										diffPrice > 0
+											? 'text-red-600 dark:text-red-400'
+											: diffPrice < 0
+												? 'text-blue-600 dark:text-blue-400'
+												: 'text-gray-500 dark:text-gray-400'
+									)}
+								>
+									<span>
+										{diffPrice === 0
+											? '-'
+											: `${diffPrice > 0 ? '' : '-'}${formatPrice(
+													Math.abs(diffPrice)
+												)}(${diffPrice > 0 ? '+' : ''}${diffRate.toFixed(2)}%)`}
+									</span>
+								</span>
+							)}
 						</div>
 					)}
 				</div>
