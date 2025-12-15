@@ -2,7 +2,7 @@ import { formatDateToYYYYMMDD } from '@/lib/format';
 import { ApiResponse } from '@/types/api';
 import { News, NewsDetail } from '@/types/news';
 
-const API_URL = `${process.env.NEXT_PUBLIC_SERVICE_URL}/news`;
+const API_URL = `${process.env.SERVICE_URL}/news`;
 // const CLIENT_API_URL = `${process.env.NEXT_PUBLIC_API_URL}/news`;
 
 export const getNewsByDate = async (date: string) => {
