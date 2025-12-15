@@ -19,12 +19,13 @@ export const metadata: Metadata = {
 	description: '기업과 기업을 연결하고 탐색하는 LINKompany',
 	metadataBase: new URL('https://noru.panghae.site'),
 	openGraph: {
-		title: 'LINKompany',
+		url: 'https://noru.panghae.site',
+		siteName: 'LINKompany',
 		description: '기업과 기업을 연결하고 탐색하는 LINKompany',
 		images: '/og-image.png',
-		siteName: 'LINKompany',
 		locale: 'ko_KR',
 		type: 'website',
+		title: 'LINKompany',
 	},
 };
 
