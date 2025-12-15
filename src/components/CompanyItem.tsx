@@ -73,14 +73,17 @@ const CompanyItem: FC<Props> = ({
 		return Array.from(tagMap.values());
 	}, [tags]);
 
+	const isClickable = isDomestic && isListed;
+
 	const content = (
 		<div
 			className={cn(
 				'flex flex-col gap-2 sm:gap-3 p-3 sm:p-4 bg-muted/50 rounded-lg transition-colors',
-				isDomestic
+				isClickable
 					? 'hover:bg-muted cursor-pointer'
-					: 'opacity-60 cursor-not-allowed'
+					: 'opacity-60 cursor-not-allowed pointer-events-none'
 			)}
+			aria-disabled={!isClickable}
 		>
 			<div className="flex items-start gap-2 sm:gap-3">
 				{/* 로고 */}
@@ -109,11 +112,6 @@ const CompanyItem: FC<Props> = ({
 				<div className="flex-1 min-w-0">
 					<div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
 						<div className="font-medium text-sm sm:text-base">{name}</div>
-						{companyId && (
-							<span className="text-xs text-muted-foreground">
-								({companyId})
-							</span>
-						)}
 					</div>
 					{price !== -1 && (
 						<div className="flex items-center gap-1.5 sm:gap-2 mt-0.5 sm:mt-1">
@@ -183,7 +181,7 @@ const CompanyItem: FC<Props> = ({
 		</div>
 	);
 
-	if (isDomestic) {
+	if (isDomestic && isListed) {
 		return (
 			<>
 				<Link href={`/company/${companyId}`} className="block">
