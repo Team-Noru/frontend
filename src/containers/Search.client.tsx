@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 
 import { useRouter, useSearchParams } from 'next/navigation';
 
@@ -19,22 +19,27 @@ const SearchClient = () => {
 	const debouncedQuery = useDebounce(searchQuery, 300);
 	const { data: searchResults, isLoading } = useSearch(debouncedQuery);
 
-	// URL 파라미터에서 탭 정보 가져오기
-	const activeTab = useMemo(() => {
+	// 탭 상태 관리 (URL 변경 없이)
+	const [activeTab, setActiveTab] = useState(() => {
 		const type = searchParams.get('type');
 		return type === 'companies' ? 'companies' : 'news';
-	}, [searchParams]);
+	});
 
 	const handleTabChange = (value: string) => {
-		const query = searchQuery || searchParams.get('q') || '';
-		if (query) {
-			router.push(`/search?q=${encodeURIComponent(query)}&type=${value}`);
-		}
+		setActiveTab(value);
 	};
 
 	const handleSearch = (e: React.FormEvent) => {
 		e.preventDefault();
 		if (!searchQuery.trim()) return;
+
+		// 모바일에서는 URL 변경하지 않음 (lg 브레이크포인트: 1024px)
+		const isMobile = window.innerWidth < 1024;
+		if (isMobile) {
+			return;
+		}
+
+		// 데스크탑에서만 페이지 이동
 		router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
 	};
 

@@ -1,13 +1,16 @@
-import { FC, useMemo } from 'react';
+import React, { FC, useMemo, useState, useEffect } from 'react';
 
 import Image from 'next/image';
 import Link from 'next/link';
 
+import BottomSheet from '@/components/ui/bottom-sheet';
 import { getCompanyColor } from '@/lib/color';
 import { formatPrice } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { getSentimentColor, getStockImageUrl } from '@/lib/values';
 import { Company, Tag } from '@/types/company';
+
+import { TagWithTooltip } from './ui/TagWithTooltip';
 
 interface Props extends Company {
 	showSentiment?: boolean;
@@ -24,9 +27,28 @@ const CompanyItem: FC<Props> = ({
 	showSentiment = false,
 }) => {
 	const stockImageUrl = getStockImageUrl(companyId, isDomestic);
-	const shouldShowInitial = !isListed && isDomestic && !stockImageUrl;
+	// isDomestic이 false이거나, (isListed가 false이고 isDomestic이 true이지만 stockImageUrl이 없는 경우) 초기 표시
+	const shouldShowInitial =
+		!isDomestic || (!isListed && isDomestic && !stockImageUrl);
 	const initialLetter = name.charAt(0).toUpperCase();
 	const backgroundColor = shouldShowInitial ? getCompanyColor(name) : undefined;
+
+	// 모바일 여부 감지
+	const [isMobile, setIsMobile] = useState(false);
+	useEffect(() => {
+		const checkMobile = () => {
+			setIsMobile(window.innerWidth < 1024); // lg 브레이크포인트
+		};
+		checkMobile();
+		window.addEventListener('resize', checkMobile);
+		return () => window.removeEventListener('resize', checkMobile);
+	}, []);
+
+	// 바텀시트 상태
+	const [selectedTag, setSelectedTag] = useState<{
+		tag: Tag;
+		relReasons: string[];
+	} | null>(null);
 
 	// 태그를 label 기준으로 그룹화하고 relReason 수집
 	const groupedTags = useMemo(() => {
@@ -69,8 +91,7 @@ const CompanyItem: FC<Props> = ({
 							{initialLetter}
 						</div>
 					) : (
-						stockImageUrl &&
-						(isDomestic ? (
+						stockImageUrl && (
 							<Image
 								src={stockImageUrl}
 								alt={name}
@@ -78,17 +99,7 @@ const CompanyItem: FC<Props> = ({
 								height={48}
 								className="object-contain w-full h-full"
 							/>
-						) : (
-							<Image
-								src={stockImageUrl}
-								alt={name}
-								width={48}
-								height={48}
-								unoptimized
-								preload
-								className="object-contain w-full h-full"
-							/>
-						))
+						)
 					)}
 				</div>
 
@@ -131,18 +142,16 @@ const CompanyItem: FC<Props> = ({
 							.map((reason) => `- ${reason}`)
 							.join('\n');
 						return (
-							<span
+							<TagWithTooltip
 								key={`${companyId}-${tag.label}-${tag.id}`}
-								className="relative group px-2 py-0.5 sm:py-1 text-xs bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-md font-medium cursor-help"
-							>
-								{tag.label}
-								{tooltipText && (
-									<span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1.5 text-xs text-white bg-gray-900 dark:bg-gray-800 rounded-md whitespace-pre-line opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity z-50 w-[250px] text-left shadow-lg pointer-events-none">
-										{tooltipText}
-										<span className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900 dark:border-t-gray-800"></span>
-									</span>
-								)}
-							</span>
+								tag={tag}
+								tooltipText={tooltipText}
+								relReasons={relReasons}
+								onMobileClick={() =>
+									isMobile && setSelectedTag({ tag, relReasons })
+								}
+								isMobile={isMobile}
+							/>
 						);
 					})}
 				</div>
@@ -152,13 +161,51 @@ const CompanyItem: FC<Props> = ({
 
 	if (isDomestic) {
 		return (
-			<Link href={`/company/${companyId}`} className="block">
-				{content}
-			</Link>
+			<>
+				<Link href={`/company/${companyId}`} className="block">
+					{content}
+				</Link>
+				{/* 바텀시트 (모바일 전용) - content 밖에서 렌더링하여 opacity 영향 방지 */}
+				{isMobile && selectedTag && (
+					<BottomSheet
+						open={!!selectedTag}
+						onClose={() => setSelectedTag(null)}
+						title={selectedTag.tag.label}
+					>
+						<div className="space-y-2">
+							{selectedTag.relReasons.map((reason, index) => (
+								<div key={index} className="text-sm text-foreground">
+									- {reason}
+								</div>
+							))}
+						</div>
+					</BottomSheet>
+				)}
+			</>
 		);
 	}
 
-	return content;
+	return (
+		<>
+			{content}
+			{/* 바텀시트 (모바일 전용) - content 밖에서 렌더링하여 opacity 영향 방지 */}
+			{isMobile && selectedTag && (
+				<BottomSheet
+					open={!!selectedTag}
+					onClose={() => setSelectedTag(null)}
+					title={selectedTag.tag.label}
+				>
+					<div className="space-y-2">
+						{selectedTag.relReasons.map((reason, index) => (
+							<div key={index} className="text-sm text-foreground">
+								- {reason}
+							</div>
+						))}
+					</div>
+				</BottomSheet>
+			)}
+		</>
+	);
 };
 
 export default CompanyItem;

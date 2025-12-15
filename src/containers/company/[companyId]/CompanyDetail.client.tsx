@@ -16,6 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { getStockImageUrl } from '@/lib/values';
 import {
 	Announcement,
+	Company,
 	CompanyDetail,
 	Sentiment,
 	WordData,
@@ -74,6 +75,19 @@ const CompanyDetailClientContainer: FC<Props> = ({
 
 		return { nodes: graphNodes, edges: graphEdges };
 	}, [companyData]);
+
+	// 연관 기업 정렬: isDomestic && isListed > isDomestic && !isListed > !isDomestic
+	const sortedRelatedCompanies = useMemo(() => {
+		return [...companyData.related].sort((a, b) => {
+			// 1순위: isDomestic && isListed (0), 2순위: isDomestic && !isListed (1), 3순위: !isDomestic (2)
+			const getPriority = (company: Company) => {
+				if (company.isDomestic && company.isListed) return 0;
+				if (company.isDomestic && !company.isListed) return 1;
+				return 2;
+			};
+			return getPriority(a) - getPriority(b);
+		});
+	}, [companyData.related]);
 
 	// 타입별 색상 매핑
 	const getColorByType = (type: WordType): string => {
@@ -380,7 +394,7 @@ const CompanyDetailClientContainer: FC<Props> = ({
 							<h2 className="text-2xl font-bold mb-4">연관 기업</h2>
 							{/* 기업 목록 */}
 							<div className="space-y-3">
-								{companyData.related.map((company) => (
+								{sortedRelatedCompanies.map((company) => (
 									<CompanyItem
 										key={`${company.companyId || ''}-${company.name}`}
 										companyId={company.companyId}
@@ -546,7 +560,7 @@ const CompanyDetailClientContainer: FC<Props> = ({
 						</TabsContent>
 						<TabsContent value="companies" className="mt-6">
 							<div className="space-y-3">
-								{companyData.related.map((company) => (
+								{sortedRelatedCompanies.map((company) => (
 									<CompanyItem
 										key={company.companyId}
 										companyId={company.companyId}
