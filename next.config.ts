@@ -7,21 +7,6 @@ const nextConfig: NextConfig = {
 				protocol: 'https',
 				hostname: 'images.tossinvest.com',
 			},
-			{
-				protocol: 'https',
-				hostname: 'static.hankyung.com',
-				pathname: '/**',
-			},
-			{
-				protocol: 'https',
-				hostname: 'img.hankyung.com',
-				pathname: '/**',
-			},
-			{
-				protocol: 'https',
-				hostname: 'eodhd.com',
-				pathname: '/**',
-			},
 		],
 	},
 	async rewrites() {

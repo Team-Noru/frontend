@@ -1,6 +1,6 @@
 'use client';
 
-import { FC, useMemo, useState, useEffect } from 'react';
+import { FC, useMemo, useState, useEffect, useRef } from 'react';
 
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
@@ -19,12 +19,14 @@ import {
 	CompanyDetail,
 	Sentiment,
 	WordData,
+	WordDataDTO,
+	WordType,
 } from '@/types/company';
 import { News } from '@/types/news';
 
 interface Props {
 	companyData: CompanyDetail;
-	wordCloudData: WordData[];
+	wordCloudData: WordDataDTO[];
 	newsData: News[];
 	announcementsData: Announcement[];
 }
@@ -41,6 +43,7 @@ const CompanyDetailClientContainer: FC<Props> = ({
 	announcementsData,
 }) => {
 	const [activeTab, setActiveTab] = useState('network');
+
 	// 네트워크 그래프 노드 및 엣지 생성
 	const { nodes, edges } = useMemo(() => {
 		const graphNodes = [
@@ -72,14 +75,65 @@ const CompanyDetailClientContainer: FC<Props> = ({
 		return { nodes: graphNodes, edges: graphEdges };
 	}, [companyData]);
 
-	// 워드 클라우드 설정
-	const fontScale = scaleLog({
-		domain: [
-			Math.min(...wordCloudData.map((w) => w.value)),
-			Math.max(...wordCloudData.map((w) => w.value)),
-		],
-		range: [20, 80],
-	});
+	// 타입별 색상 매핑
+	const getColorByType = (type: WordType): string => {
+		const colorMap: Record<WordType, string> = {
+			ORG: '#3b82f6', // 파랑 (blue-500)
+			PERSON: '#f97316', // 주황 (orange-500)
+			TECH: '#a855f7', // 보라 (purple-500)
+			PRODUCT: '#10b981', // 초록 (green-500)
+			MARKET: '#0ea5e9', // 하늘 (sky-500)
+			FINANCE: '#059669', // 진초록 (emerald-600)
+			GOVERNANCE: '#6b7280', // 회색 (gray-500)
+		};
+		return colorMap[type];
+	};
+
+	// 타입별 레이블 매핑
+	const getLabelByType = (type: WordType): string => {
+		const labelMap: Record<WordType, string> = {
+			ORG: '기업/기관',
+			PERSON: '인물',
+			TECH: '기술/반도체',
+			PRODUCT: '제품/서비스',
+			MARKET: '시장',
+			FINANCE: '실적/재무',
+			GOVERNANCE: '지배구조',
+		};
+		return labelMap[type];
+	};
+
+	// WordDataDTO를 WordData로 변환
+	const transformedWordCloudData = useMemo(() => {
+		return wordCloudData.map((word) => ({
+			text: word.text,
+			value: word.weight,
+			type: word.type,
+		}));
+	}, [wordCloudData]);
+
+	// 모바일 여부 감지
+	const [isMobile, setIsMobile] = useState(false);
+
+	useEffect(() => {
+		const checkMobile = () => {
+			setIsMobile(window.innerWidth < 1024); // lg 브레이크포인트
+		};
+		checkMobile();
+		window.addEventListener('resize', checkMobile);
+		return () => window.removeEventListener('resize', checkMobile);
+	}, []);
+
+	// 워드 클라우드 설정 (모바일일 때 글자 크기 축소)
+	const fontScale = useMemo(() => {
+		return scaleLog({
+			domain: [
+				Math.min(...transformedWordCloudData.map((w) => w.value)),
+				Math.max(...transformedWordCloudData.map((w) => w.value)),
+			],
+			range: isMobile ? [12, 40] : [20, 80], // 모바일: 12-40, 데스크탑: 20-80
+		});
+	}, [transformedWordCloudData, isMobile]);
 	const fontSizeSetter = (datum: WordData) => fontScale(datum.value);
 
 	// 워드 클라우드 크기 계산 (반응형)
@@ -87,18 +141,60 @@ const CompanyDetailClientContainer: FC<Props> = ({
 		width: 600,
 		height: 300,
 	});
+	const wordCloudContainerRef = useRef<HTMLDivElement>(null);
+	const wordCloudMobileContainerRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
 		const updateSize = () => {
-			const width = Math.min(600, window.innerWidth - 32); // 패딩 고려
-			const height = Math.min(300, width * 0.5);
-			setWordCloudSize({ width, height });
+			// 데스크탑과 모바일 컨테이너 크기 확인
+			const desktopContainer = wordCloudContainerRef.current;
+			const mobileContainer = wordCloudMobileContainerRef.current;
+			const activeContainer = mobileContainer || desktopContainer;
+
+			if (activeContainer) {
+				const containerRect = activeContainer.getBoundingClientRect();
+				const width = Math.min(600, containerRect.width);
+				// 모바일의 경우 컨테이너 높이에 맞춤 (200px 또는 250px)
+				const height = mobileContainer
+					? containerRect.height
+					: Math.min(300, width * 0.5);
+				setWordCloudSize({ width, height });
+			} else {
+				// 초기 렌더링 시 fallback
+				const width = Math.min(600, window.innerWidth - 32);
+				const height = Math.min(300, width * 0.5);
+				setWordCloudSize({ width, height });
+			}
 		};
 
-		updateSize();
+		// 약간의 지연을 두어 DOM이 완전히 렌더링된 후 크기 계산
+		const timeoutId = setTimeout(updateSize, 0);
+
 		window.addEventListener('resize', updateSize);
-		return () => window.removeEventListener('resize', updateSize);
-	}, []);
+		// ResizeObserver를 사용하여 컨테이너 크기 변화 감지
+		const resizeObserver = new ResizeObserver(updateSize);
+
+		// ref가 연결된 후에 observe 시작
+		const observeContainers = () => {
+			if (wordCloudContainerRef.current) {
+				resizeObserver.observe(wordCloudContainerRef.current);
+			}
+			if (wordCloudMobileContainerRef.current) {
+				resizeObserver.observe(wordCloudMobileContainerRef.current);
+			}
+		};
+
+		// 즉시 시도하고, 약간의 지연 후에도 시도 (탭 전환 시 DOM 재연결 대비)
+		observeContainers();
+		const observeTimeoutId = setTimeout(observeContainers, 100);
+
+		return () => {
+			clearTimeout(timeoutId);
+			clearTimeout(observeTimeoutId);
+			window.removeEventListener('resize', updateSize);
+			resizeObserver.disconnect();
+		};
+	}, [activeTab]); // activeTab이 변경될 때마다 다시 설정
 
 	return (
 		<div className="w-full h-full bg-white overflow-auto">
@@ -154,25 +250,27 @@ const CompanyDetailClientContainer: FC<Props> = ({
 						{/* 워드 클라우드 */}
 						<div className="border border-border rounded-lg p-6 bg-white">
 							<div className="flex justify-between items-center mb-4">
-								<h3 className="text-xl font-bold">분석 대상뉴스 7,086건</h3>
-								<div className="flex gap-2 text-xs">
-									<span className="flex items-center gap-1">
-										<span className="w-2 h-2 bg-orange-500 rounded-full"></span>
-										인물
-									</span>
-									<span className="flex items-center gap-1">
-										<span className="w-2 h-2 bg-green-500 rounded-full"></span>
-										장소
-									</span>
-									<span className="flex items-center gap-1">
-										<span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-										기관
-									</span>
+								<h3 className="text-xl font-bold">트렌드</h3>
+								<div className="flex flex-wrap gap-2 text-xs">
+									{Array.from(new Set(wordCloudData.map((w) => w.type))).map(
+										(type) => (
+											<span key={type} className="flex items-center gap-1">
+												<span
+													className="w-2 h-2 rounded-full"
+													style={{ backgroundColor: getColorByType(type) }}
+												></span>
+												{getLabelByType(type)}
+											</span>
+										)
+									)}
 								</div>
 							</div>
-							<div className="h-[300px] w-full overflow-hidden">
+							<div
+								ref={wordCloudContainerRef}
+								className="h-[300px] w-full overflow-hidden"
+							>
 								<Wordcloud
-									words={wordCloudData}
+									words={transformedWordCloudData}
 									width={wordCloudSize.width}
 									height={wordCloudSize.height}
 									fontSize={fontSizeSetter}
@@ -182,24 +280,26 @@ const CompanyDetailClientContainer: FC<Props> = ({
 									rotate={0}
 								>
 									{(cloudWords) =>
-										cloudWords.map((w, i) => (
-											<Text
-												key={w.text}
-												fill={
-													i % 3 === 0
-														? '#f97316'
-														: i % 3 === 1
-															? '#10b981'
-															: '#3b82f6'
-												}
-												textAnchor={'middle'}
-												transform={`translate(${w.x}, ${w.y}) rotate(${w.rotate})`}
-												fontSize={w.size}
-												fontFamily={w.font}
-											>
-												{w.text}
-											</Text>
-										))
+										cloudWords.map((w) => {
+											const originalWord = wordCloudData.find(
+												(word) => word.text === w.text
+											);
+											const color = originalWord
+												? getColorByType(originalWord.type)
+												: '#6b7280';
+											return (
+												<Text
+													key={w.text}
+													fill={color}
+													textAnchor={'middle'}
+													transform={`translate(${w.x}, ${w.y}) rotate(${w.rotate})`}
+													fontSize={w.size}
+													fontFamily={w.font}
+												>
+													{w.text}
+												</Text>
+											);
+										})
 									}
 								</Wordcloud>
 							</div>
@@ -320,27 +420,29 @@ const CompanyDetailClientContainer: FC<Props> = ({
 							{/* 워드 클라우드 */}
 							<div className="border border-border rounded-lg p-4 bg-white">
 								<div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0 mb-4">
-									<h3 className="text-base sm:text-lg font-bold">
-										분석 대상뉴스 7,086건
-									</h3>
-									<div className="flex gap-1.5 sm:gap-2 text-xs">
-										<span className="flex items-center gap-1">
-											<span className="w-2 h-2 bg-orange-500 rounded-full"></span>
-											인물
-										</span>
-										<span className="flex items-center gap-1">
-											<span className="w-2 h-2 bg-green-500 rounded-full"></span>
-											장소
-										</span>
-										<span className="flex items-center gap-1">
-											<span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-											기관
-										</span>
+									<h3 className="text-base sm:text-lg font-bold">트렌드</h3>
+									<div className="flex flex-wrap gap-1.5 sm:gap-2 text-xs">
+										{Array.from(new Set(wordCloudData.map((w) => w.type))).map(
+											(type) => (
+												<span key={type} className="flex items-center gap-1">
+													<span
+														className="w-2 h-2 rounded-full"
+														style={{
+															backgroundColor: getColorByType(type),
+														}}
+													></span>
+													{getLabelByType(type)}
+												</span>
+											)
+										)}
 									</div>
 								</div>
-								<div className="h-[200px] sm:h-[250px] w-full overflow-hidden">
+								<div
+									ref={wordCloudMobileContainerRef}
+									className="h-[200px] sm:h-[250px] w-full overflow-hidden"
+								>
 									<Wordcloud
-										words={wordCloudData}
+										words={transformedWordCloudData}
 										width={wordCloudSize.width}
 										height={wordCloudSize.height}
 										fontSize={fontSizeSetter}
@@ -350,24 +452,26 @@ const CompanyDetailClientContainer: FC<Props> = ({
 										rotate={0}
 									>
 										{(cloudWords) =>
-											cloudWords.map((w, i) => (
-												<Text
-													key={w.text}
-													fill={
-														i % 3 === 0
-															? '#f97316'
-															: i % 3 === 1
-																? '#10b981'
-																: '#3b82f6'
-													}
-													textAnchor={'middle'}
-													transform={`translate(${w.x}, ${w.y}) rotate(${w.rotate})`}
-													fontSize={w.size}
-													fontFamily={w.font}
-												>
-													{w.text}
-												</Text>
-											))
+											cloudWords.map((w) => {
+												const originalWord = wordCloudData.find(
+													(word) => word.text === w.text
+												);
+												const color = originalWord
+													? getColorByType(originalWord.type)
+													: '#6b7280';
+												return (
+													<Text
+														key={w.text}
+														fill={color}
+														textAnchor={'middle'}
+														transform={`translate(${w.x}, ${w.y}) rotate(${w.rotate})`}
+														fontSize={w.size}
+														fontFamily={w.font}
+													>
+														{w.text}
+													</Text>
+												);
+											})
 										}
 									</Wordcloud>
 								</div>

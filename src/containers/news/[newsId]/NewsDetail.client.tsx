@@ -115,6 +115,8 @@ const NewsDetailClient: FC<Props> = ({ newsData }) => {
 														height={800}
 														className="max-w-full h-auto max-h-[400px] sm:max-h-[500px] md:max-h-[600px]"
 														sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 1280px"
+														unoptimized
+														preload
 													/>
 												</div>
 											);
@@ -249,6 +251,8 @@ const NewsDetailClient: FC<Props> = ({ newsData }) => {
 															height={800}
 															className="max-w-full h-auto max-h-[300px] sm:max-h-[400px]"
 															sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 1280px"
+															unoptimized
+															preload
 														/>
 													</div>
 												);

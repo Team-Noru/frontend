@@ -35,7 +35,9 @@ const NewsItem: FC<Props> = ({
 						alt={title}
 						fill
 						sizes="(max-width: 640px) 100vw, 128px"
-						className="object-contain"
+						className="object-cover"
+						unoptimized
+						preload
 					/>
 				) : (
 					<div className="w-full h-full bg-gray-200 flex items-center justify-center">

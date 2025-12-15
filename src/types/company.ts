@@ -7,7 +7,9 @@ export type Sentiment =
 
 export interface Tag {
 	id: number;
+	direction: 'IN' | 'OUT';
 	label: string;
+	relReason: string;
 }
 
 export interface Company {
@@ -35,9 +37,25 @@ export interface Announcement {
 	publishedAt: string;
 }
 
+export type WordType =
+	| 'ORG'
+	| 'PERSON'
+	| 'TECH'
+	| 'PRODUCT'
+	| 'MARKET'
+	| 'FINANCE'
+	| 'GOVERNANCE';
+
+export interface WordDataDTO {
+	text: string;
+	weight: number;
+	type: WordType;
+}
+
 export interface WordData {
 	text: string;
 	value: number;
+	type?: WordType;
 }
 
 export interface CompanyPriceDTO {
@@ -46,4 +64,9 @@ export interface CompanyPriceDTO {
 	price: number;
 	diffPrice: number;
 	diffRate: number;
+}
+
+export interface CompanyWordCloud {
+	companyId: string;
+	wordList: WordDataDTO[];
 }
