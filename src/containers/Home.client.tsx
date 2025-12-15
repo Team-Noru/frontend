@@ -59,6 +59,8 @@ const HomeClientContainer: React.FC<Props> = ({ newsData, companies }) => {
 										tags={company.tags}
 										showSentiment={false}
 										price={company.price}
+										diffPrice={company.diffPrice}
+										diffRate={company.diffRate}
 									/>
 								))}
 							</div>
@@ -101,6 +103,8 @@ const HomeClientContainer: React.FC<Props> = ({ newsData, companies }) => {
 										tags={company.tags}
 										showSentiment={false}
 										price={company.price}
+										diffPrice={company.diffPrice}
+										diffRate={company.diffRate}
 									/>
 								))}
 							</div>
