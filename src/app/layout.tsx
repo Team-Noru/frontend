@@ -35,7 +35,7 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang="en">
+		<html lang="ko">
 			<body
 				className={`${pretendard.className} antialiased flex flex-col w-dvw h-dvh overflow-hidden bg-custom-gray-bg`}
 			>
