@@ -9,13 +9,17 @@ const nextConfig: NextConfig = {
 			},
 		],
 	},
+	output: 'standalone',
 	async rewrites() {
-		return [
-			{
-				source: '/api/v1/:path*',
-				destination: `${process.env.SERVICE_URL}/:path*`,
-			},
-		];
+		if (process.env.NODE_ENV === 'development') {
+			return [
+				{
+					source: '/api/v1/:path*',
+					destination: `${process.env.SERVICE_URL}/:path*`,
+				},
+			];
+		}
+		return [];
 	},
 };
 
