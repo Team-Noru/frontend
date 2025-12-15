@@ -8,8 +8,8 @@ import HomeClientContainer from './Home.client';
 
 const HomeContainer = async () => {
 	const yesterdayString = getYesterdayDateString();
-	console.log(yesterdayString);
-	const newsData = await getNewsByDate('2025-12-14');
+
+	const newsData = await getNewsByDate(yesterdayString);
 	const companiesData = await getHomeCompanies();
 	const companies = shuffleSort(
 		companiesData.map((company) => ({
