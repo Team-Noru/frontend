@@ -13,7 +13,8 @@ import { GraphEdge, GraphNode } from 'reagraph';
 import CompanyItem from '@/components/CompanyItem';
 import NewsItem from '@/components/NewsItem';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { getStockImageUrl } from '@/lib/values';
+import { getColorByType } from '@/lib/color';
+import { getLabelByType, getStockImageUrl } from '@/lib/values';
 import {
 	Announcement,
 	Company,
@@ -21,7 +22,6 @@ import {
 	Sentiment,
 	WordData,
 	WordDataDTO,
-	WordType,
 } from '@/types/company';
 import { News } from '@/types/news';
 
@@ -88,34 +88,6 @@ const CompanyDetailClientContainer: FC<Props> = ({
 			return getPriority(a) - getPriority(b);
 		});
 	}, [companyData.related]);
-
-	// 타입별 색상 매핑
-	const getColorByType = (type: WordType): string => {
-		const colorMap: Record<WordType, string> = {
-			ORG: '#3b82f6', // 파랑 (blue-500)
-			PERSON: '#f97316', // 주황 (orange-500)
-			TECH: '#a855f7', // 보라 (purple-500)
-			PRODUCT: '#10b981', // 초록 (green-500)
-			MARKET: '#0ea5e9', // 하늘 (sky-500)
-			FINANCE: '#059669', // 진초록 (emerald-600)
-			GOVERNANCE: '#6b7280', // 회색 (gray-500)
-		};
-		return colorMap[type];
-	};
-
-	// 타입별 레이블 매핑
-	const getLabelByType = (type: WordType): string => {
-		const labelMap: Record<WordType, string> = {
-			ORG: '기업/기관',
-			PERSON: '인물',
-			TECH: '기술/반도체',
-			PRODUCT: '제품/서비스',
-			MARKET: '시장',
-			FINANCE: '실적/재무',
-			GOVERNANCE: '지배구조',
-		};
-		return labelMap[type];
-	};
 
 	// WordDataDTO를 WordData로 변환
 	const transformedWordCloudData = useMemo(() => {

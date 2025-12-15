@@ -1,3 +1,5 @@
+import { WordType } from '@/types/company';
+
 export const getSentimentColor = (sentiment?: string) => {
 	switch (sentiment) {
 		case '긍정':
@@ -27,4 +29,18 @@ export const getStockImageUrl = (code?: string, isDomestic: boolean = true) => {
 		const smallCode = code.toLowerCase();
 		return `https://eodhd.com/img/logos/US/${smallCode}.png`;
 	}
+};
+
+// 타입별 레이블 매핑
+export const getLabelByType = (type: WordType): string => {
+	const labelMap: Record<WordType, string> = {
+		ORG: '기업/기관',
+		PERSON: '인물',
+		TECH: '기술/반도체',
+		PRODUCT: '제품/서비스',
+		MARKET: '시장',
+		FINANCE: '실적/재무',
+		GOVERNANCE: '지배구조',
+	};
+	return labelMap[type];
 };

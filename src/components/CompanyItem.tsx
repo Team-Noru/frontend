@@ -52,6 +52,16 @@ const CompanyItem: FC<Props> = ({
 		relReasons: string[];
 	} | null>(null);
 
+	// tag.label을 한글로 변환하는 함수
+	const translateTagLabel = (label: string): string => {
+		const labelMap: Record<string, string> = {
+			OWNERSHIP_CHANGE: '주주 변경',
+			IPO_DILUTION: 'IPO',
+			CAPITAL_INCREASE: '유상증자',
+		};
+		return labelMap[label] || label;
+	};
+
 	// 태그를 label 기준으로 그룹화하고 relReason 수집
 	const groupedTags = useMemo(() => {
 		const tagMap = new Map<string, { tag: Tag; relReasons: string[] }>();
@@ -160,17 +170,24 @@ const CompanyItem: FC<Props> = ({
 			{groupedTags && groupedTags.length > 0 && (
 				<div className="flex flex-wrap gap-1.5 sm:gap-2 mt-0.5 sm:mt-1">
 					{groupedTags.map(({ tag, relReasons }) => {
+						const translatedLabel = translateTagLabel(tag.label);
 						const tooltipText = relReasons
 							.map((reason) => `- ${reason}`)
 							.join('\n');
+						// 변환된 label을 가진 tag 객체 생성
+						const translatedTag = { ...tag, label: translatedLabel };
 						return (
 							<TagWithTooltip
 								key={`${companyId}-${tag.label}-${tag.id}`}
-								tag={tag}
+								tag={translatedTag}
 								tooltipText={tooltipText}
 								relReasons={relReasons}
 								onMobileClick={() =>
-									isMobile && setSelectedTag({ tag, relReasons })
+									isMobile &&
+									setSelectedTag({
+										tag: translatedTag,
+										relReasons,
+									})
 								}
 								isMobile={isMobile}
 							/>
