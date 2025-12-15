@@ -4,18 +4,21 @@ import { useState } from 'react';
 
 import { useRouter, useSearchParams } from 'next/navigation';
 
+import { toast } from 'sonner';
+
 import CompanyItem from '@/components/CompanyItem';
 import NewsItem from '@/components/NewsItem';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useSearch } from '@/hooks/api/search/useSearch';
 import { useDebounce } from '@/hooks/useDebounce';
 import { sortCompanies } from '@/lib/sort';
+import { isValidInput, sanitizeInput } from '@/lib/validation';
 import { Sentiment } from '@/types/company';
 
 const SearchClient = () => {
 	const router = useRouter();
 	const searchParams = useSearchParams();
-	const initialQuery = searchParams.get('q') || '';
+	const initialQuery = sanitizeInput(searchParams.get('q') || '');
 	const [searchQuery, setSearchQuery] = useState(initialQuery);
 	const debouncedQuery = useDebounce(searchQuery, 300);
 	const { data: searchResults, isLoading } = useSearch(debouncedQuery);
@@ -30,8 +33,29 @@ const SearchClient = () => {
 		setActiveTab(value);
 	};
 
+	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const rawValue = e.target.value;
+
+		// 입력 검증
+		if (!isValidInput(rawValue)) {
+			toast.error('유효하지 않은 입력입니다.');
+			return;
+		}
+
+		// 입력 정제
+		const sanitized = sanitizeInput(rawValue);
+		setSearchQuery(sanitized);
+	};
+
 	const handleSearch = (e: React.FormEvent) => {
 		e.preventDefault();
+
+		// 검증된 검색어만 사용
+		if (!isValidInput(searchQuery)) {
+			toast.error('유효하지 않은 검색어입니다.');
+			return;
+		}
+
 		if (!searchQuery.trim()) return;
 
 		// 모바일에서는 URL 변경하지 않음 (lg 브레이크포인트: 1024px)
@@ -41,7 +65,8 @@ const SearchClient = () => {
 		}
 
 		// 데스크탑에서만 페이지 이동
-		router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
+		const sanitizedQuery = sanitizeInput(searchQuery);
+		router.push(`/search?q=${encodeURIComponent(sanitizedQuery)}`);
 	};
 
 	return (
@@ -54,8 +79,9 @@ const SearchClient = () => {
 							<input
 								type="text"
 								value={searchQuery}
-								onChange={(e) => setSearchQuery(e.target.value)}
+								onChange={handleInputChange}
 								placeholder="검색..."
+								maxLength={100}
 								className="w-full px-3 py-2 pl-9 pr-3 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
 							/>
 							<svg

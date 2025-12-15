@@ -1,5 +1,7 @@
 import localFont from 'next/font/local';
 
+import { Toaster } from 'sonner';
+
 import Header from '@/components/Header';
 import QueryClientProvider from '@/components/providers/QueryClientProvider';
 
@@ -43,6 +45,7 @@ export default function RootLayout({
 					<Header />
 					<div className="flex-1 overflow-hidden">{children}</div>
 				</QueryClientProvider>
+				<Toaster position="top-right" />
 			</body>
 		</html>
 	);
