@@ -6,6 +6,7 @@ import Image from 'next/image';
 
 import CompanyItem from '@/components/CompanyItem';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { sortCompanies } from '@/lib/sort';
 import { NewsDetail } from '@/types/news';
 
 interface Props {
@@ -133,7 +134,7 @@ const NewsDetailClient: FC<Props> = ({ newsData }) => {
 						<div className="sticky top-8 space-y-4">
 							<h2 className="text-xl sm:text-2xl font-bold mb-4">연관 기업</h2>
 							<div className="space-y-3">
-								{newsData.companies.map((company) => (
+								{sortCompanies(newsData.companies).map((company) => (
 									<CompanyItem
 										key={`${company.companyId || ''}-${company.name}`}
 										companyId={company.companyId}
@@ -232,9 +233,6 @@ const NewsDetailClient: FC<Props> = ({ newsData }) => {
 												}
 											}
 
-											// 해당 위치에 이미지 삽입
-											// 마지막 segment가 아니면 이미지 삽입
-											// 또는 마지막 segment가 빈 문자열이고 이미지가 있으면 이미지 삽입 (마지막 [IMG] 처리)
 											if (
 												newsData.imageUrl[index] &&
 												(index < segments.length - 1 || !segment.trim())
@@ -265,7 +263,7 @@ const NewsDetailClient: FC<Props> = ({ newsData }) => {
 						</TabsContent>
 						<TabsContent value="companies" className="mt-6">
 							<div className="space-y-3">
-								{newsData.companies.map((company) => (
+								{sortCompanies(newsData.companies).map((company) => (
 									<CompanyItem
 										key={`${company.companyId || ''}-${company.name}`}
 										companyId={company.companyId}

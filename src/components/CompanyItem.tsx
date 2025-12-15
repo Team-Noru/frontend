@@ -168,7 +168,12 @@ const CompanyItem: FC<Props> = ({
 
 			{/* Tags */}
 			{groupedTags && groupedTags.length > 0 && (
-				<div className="flex flex-wrap gap-1.5 sm:gap-2 mt-0.5 sm:mt-1">
+				<div
+					className={cn(
+						'flex flex-wrap gap-1.5 sm:gap-2 mt-0.5 sm:mt-1',
+						!isClickable && 'pointer-events-auto'
+					)}
+				>
 					{groupedTags.map(({ tag, relReasons }) => {
 						const translatedLabel = translateTagLabel(tag.label);
 						const tooltipText = relReasons
