@@ -9,6 +9,7 @@ import NewsItem from '@/components/NewsItem';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useSearch } from '@/hooks/api/search/useSearch';
 import { useDebounce } from '@/hooks/useDebounce';
+import { sortCompanies } from '@/lib/sort';
 import { Sentiment } from '@/types/company';
 
 const SearchClient = () => {
@@ -120,7 +121,7 @@ const SearchClient = () => {
 						</TabsContent>
 						<TabsContent value="companies" className="mt-6">
 							<div className="space-y-3">
-								{searchResults.companies.map((company) => (
+								{sortCompanies(searchResults.companies).map((company) => (
 									<CompanyItem
 										key={`${company.companyId || ''}-${company.name}`}
 										companyId={company.companyId}

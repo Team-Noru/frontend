@@ -5,6 +5,7 @@ import { FC } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
+import { sortCompanies } from '@/lib/sort';
 import { Company } from '@/types/company';
 import { News } from '@/types/news';
 
@@ -78,23 +79,25 @@ const SearchResults: FC<Props> = ({
 						기업
 					</h3>
 					<div className="space-y-2">
-						{companies.slice(0, 5).map((company) => (
-							<Link
-								key={`${company.companyId || ''}-${company.name}`}
-								href={`/company/${company.companyId}`}
-								onClick={onItemClick}
-								className="block"
-							>
-								<div className="p-3 hover:bg-muted/50 rounded-lg transition-colors border border-border">
-									<div className="font-medium text-sm">{company.name}</div>
-									{company.companyId && (
-										<div className="text-xs text-muted-foreground mt-1">
-											{company.companyId}
-										</div>
-									)}
-								</div>
-							</Link>
-						))}
+						{sortCompanies(companies)
+							.slice(0, 5)
+							.map((company) => (
+								<Link
+									key={`${company.companyId || ''}-${company.name}`}
+									href={`/company/${company.companyId}`}
+									onClick={onItemClick}
+									className="block"
+								>
+									<div className="p-3 hover:bg-muted/50 rounded-lg transition-colors border border-border">
+										<div className="font-medium text-sm">{company.name}</div>
+										{company.companyId && (
+											<div className="text-xs text-muted-foreground mt-1">
+												{company.companyId}
+											</div>
+										)}
+									</div>
+								</Link>
+							))}
 						{companies.length > 5 && (
 							<button
 								type="button"

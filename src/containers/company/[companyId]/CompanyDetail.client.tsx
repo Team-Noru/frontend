@@ -14,10 +14,10 @@ import CompanyItem from '@/components/CompanyItem';
 import NewsItem from '@/components/NewsItem';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { getColorByType } from '@/lib/color';
+import { sortCompanies } from '@/lib/sort';
 import { getLabelByType, getStockImageUrl } from '@/lib/values';
 import {
 	Announcement,
-	Company,
 	CompanyDetail,
 	Sentiment,
 	WordData,
@@ -76,17 +76,9 @@ const CompanyDetailClientContainer: FC<Props> = ({
 		return { nodes: graphNodes, edges: graphEdges };
 	}, [companyData]);
 
-	// 연관 기업 정렬: isDomestic && isListed > isDomestic && !isListed > !isDomestic
+	// 연관 기업 정렬: companyId가 있는 회사를 우선, 그 다음 isDomestic && isListed > isDomestic && !isListed > !isDomestic
 	const sortedRelatedCompanies = useMemo(() => {
-		return [...companyData.related].sort((a, b) => {
-			// 1순위: isDomestic && isListed (0), 2순위: isDomestic && !isListed (1), 3순위: !isDomestic (2)
-			const getPriority = (company: Company) => {
-				if (company.isDomestic && company.isListed) return 0;
-				if (company.isDomestic && !company.isListed) return 1;
-				return 2;
-			};
-			return getPriority(a) - getPriority(b);
-		});
+		return sortCompanies(companyData.related);
 	}, [companyData.related]);
 
 	// WordDataDTO를 WordData로 변환

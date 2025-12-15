@@ -29,9 +29,9 @@ const CompanyItem: FC<Props> = ({
 	diffRate,
 }) => {
 	const stockImageUrl = getStockImageUrl(companyId, isDomestic);
-	// isDomestic이 false이거나, (isListed가 false이고 isDomestic이 true이지만 stockImageUrl이 없는 경우) 초기 표시
+	// companyId가 없거나, isDomestic이 false이거나, (isListed가 false이고 isDomestic이 true이지만 stockImageUrl이 없는 경우) 초기 표시
 	const shouldShowInitial =
-		!isDomestic || (!isListed && isDomestic && !stockImageUrl);
+		!companyId || !isDomestic || (!isListed && isDomestic && !stockImageUrl);
 	const initialLetter = name.charAt(0).toUpperCase();
 	const backgroundColor = shouldShowInitial ? getCompanyColor(name) : undefined;
 
@@ -83,7 +83,7 @@ const CompanyItem: FC<Props> = ({
 		return Array.from(tagMap.values());
 	}, [tags]);
 
-	const isClickable = isDomestic && isListed;
+	const isClickable = !!companyId && isDomestic && isListed;
 
 	const content = (
 		<div
@@ -198,7 +198,7 @@ const CompanyItem: FC<Props> = ({
 		</div>
 	);
 
-	if (isDomestic && isListed) {
+	if (isClickable) {
 		return (
 			<>
 				<Link href={`/company/${companyId}`} className="block">
