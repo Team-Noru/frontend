@@ -27,17 +27,23 @@ const HomeClientContainer: React.FC<Props> = ({ newsData, companies }) => {
 							오늘의 뉴스
 						</h2>
 						<div className="space-y-2">
-							{newsData?.map((news) => (
-								<NewsItem
-									key={news.id}
-									id={news.id}
-									title={news.title}
-									description={news.description}
-									publishedAt={news.publishedAt}
-									thumbnailUrl={news.thumbnailUrl}
-									publisher={news.publisher}
-								/>
-							))}
+							{newsData && newsData.length > 0 ? (
+								newsData.map((news) => (
+									<NewsItem
+										key={news.id}
+										id={news.id}
+										title={news.title}
+										description={news.description}
+										publishedAt={news.publishedAt}
+										thumbnailUrl={news.thumbnailUrl}
+										publisher={news.publisher}
+									/>
+								))
+							) : (
+								<div className="text-center py-8 text-gray-500">
+									오늘의 뉴스가 없습니다.
+								</div>
+							)}
 						</div>
 					</div>
 
@@ -77,17 +83,23 @@ const HomeClientContainer: React.FC<Props> = ({ newsData, companies }) => {
 						</TabsList>
 						<TabsContent value="news" className="mt-6">
 							<div className="space-y-2">
-								{newsData?.map((news) => (
-									<NewsItem
-										key={news.id}
-										id={news.id}
-										title={news.title}
-										description={news.description}
-										publishedAt={news.publishedAt}
-										thumbnailUrl={news.thumbnailUrl}
-										publisher={news.publisher}
-									/>
-								))}
+								{newsData && newsData.length > 0 ? (
+									newsData.map((news) => (
+										<NewsItem
+											key={news.id}
+											id={news.id}
+											title={news.title}
+											description={news.description}
+											publishedAt={news.publishedAt}
+											thumbnailUrl={news.thumbnailUrl}
+											publisher={news.publisher}
+										/>
+									))
+								) : (
+									<div className="text-center py-8 text-gray-500">
+										오늘의 뉴스가 없습니다.
+									</div>
+								)}
 							</div>
 						</TabsContent>
 						<TabsContent value="companies" className="mt-6">
