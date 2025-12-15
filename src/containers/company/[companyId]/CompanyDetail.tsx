@@ -1,5 +1,6 @@
 import { FC } from 'react';
 
+import NotFound from '@/components/ui/NotFound';
 import {
 	getCompanyAnnouncementsById,
 	getCompanyDetailById,
@@ -27,7 +28,13 @@ const CompanyDetailContainer: FC<Props> = async ({ params }) => {
 		]);
 
 	if (!companyData) {
-		return <div>Company not found</div>;
+		return (
+			<NotFound
+				title="기업을 찾을 수 없습니다"
+				description="요청하신 기업이 존재하지 않거나 삭제되었을 수 있습니다."
+				imageAlt="Company Not Found"
+			/>
+		);
 	}
 
 	return (
