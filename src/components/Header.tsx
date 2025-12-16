@@ -31,10 +31,6 @@ const Header = () => {
 		router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
 	};
 
-	const handleMobileSearchClick = () => {
-		router.push('/search');
-	};
-
 	return (
 		<header className="sticky top-0 z-50 bg-white border-b border-border">
 			{/* 데스크탑 레이아웃 */}
@@ -124,15 +120,15 @@ const Header = () => {
 							<Image
 								src="/linkompany-mini-logo.png"
 								alt="LINKompany"
-								width={120}
+								width={36}
 								height={36}
 								className="h-8 w-auto"
 								priority
 							/>
 						</Link>
-						<button
+						<Link
 							type="button"
-							onClick={handleMobileSearchClick}
+							href="/search"
 							className="flex items-center justify-center w-10 h-10 rounded-lg hover:bg-muted transition-colors shrink-0"
 						>
 							<svg
@@ -150,10 +146,10 @@ const Header = () => {
 								<circle cx="11" cy="11" r="8" />
 								<path d="m21 21-4.35-4.35" />
 							</svg>
-						</button>
+						</Link>
 					</div>
 				) : (
-					/* 다른 페이지: 백버튼 + 검색 버튼 */
+					/* 다른 페이지: 백버튼 + 홈 버튼 + 검색 버튼 */
 					<div className="flex items-center justify-between gap-2 h-14 px-4">
 						<BackButton
 							fallbackUrl="/"
@@ -175,27 +171,49 @@ const Header = () => {
 								<path d="M19 12H5" />
 							</svg>
 						</BackButton>
-						<button
-							type="button"
-							onClick={handleMobileSearchClick}
-							className="flex items-center justify-center w-10 h-10 rounded-lg hover:bg-muted transition-colors shrink-0"
-						>
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								width="20"
-								height="20"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								strokeWidth="2"
-								strokeLinecap="round"
-								strokeLinejoin="round"
-								className="text-foreground"
+						<div className="flex items-center gap-1">
+							<Link
+								href="/"
+								className="flex items-center justify-center w-10 h-10 rounded-lg hover:bg-muted transition-colors shrink-0"
 							>
-								<circle cx="11" cy="11" r="8" />
-								<path d="m21 21-4.35-4.35" />
-							</svg>
-						</button>
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									width="20"
+									height="20"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									strokeWidth="2"
+									strokeLinecap="round"
+									strokeLinejoin="round"
+									className="text-foreground"
+								>
+									<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+									<polyline points="9 22 9 12 15 12 15 22" />
+								</svg>
+							</Link>
+							<Link
+								type="button"
+								href="/search"
+								className="flex items-center justify-center w-10 h-10 rounded-lg hover:bg-muted transition-colors shrink-0"
+							>
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									width="20"
+									height="20"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									strokeWidth="2"
+									strokeLinecap="round"
+									strokeLinejoin="round"
+									className="text-foreground"
+								>
+									<circle cx="11" cy="11" r="8" />
+									<path d="m21 21-4.35-4.35" />
+								</svg>
+							</Link>
+						</div>
 					</div>
 				)}
 			</div>
