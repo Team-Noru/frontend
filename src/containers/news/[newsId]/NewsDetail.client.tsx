@@ -48,7 +48,7 @@ const NewsDetailClient: FC<Props> = ({ newsData }) => {
 							</header>
 							{/* AI 뉴스 요약 */}
 							{newsData.summary && (
-								<div className="rounded-2xl p-4 sm:p-5 bg-gradient-to-br from-blue-50/80 via-purple-50/60 to-blue-100/40 border border-blue-100/50 shadow-sm">
+								<div className="rounded-2xl p-4 sm:p-5 bg-linear-to-br from-blue-50/80 via-purple-50/60 to-blue-100/40 border border-blue-100/50 shadow-sm">
 									<div className="flex items-start gap-3">
 										{/* AI 아이콘 */}
 										<div className="shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white border-2 border-blue-400/60 flex items-center justify-center shadow-sm">
