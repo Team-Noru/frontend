@@ -87,6 +87,24 @@ const CompanyNetworkGraph: FC<CompanyNetworkGraphProps> = ({ companyData }) => {
 		'in' | 'out' | 'all'
 	>('in');
 
+	// 노드 색상 결정 함수
+	const getNodeColor = (tags: Company['tags'] = []): string => {
+		// 1. label='투자사'인 경우
+		const hasInvestorTag = tags.some((tag) => tag.label === '투자사');
+		if (hasInvestorTag) {
+			return '#dc9192';
+		}
+
+		// 2. newsId가 null이 아닌 경우
+		const hasNewsId = tags.some((tag) => tag.newsId != null);
+		if (hasNewsId) {
+			return '#efe298';
+		}
+
+		// 3. 이외 나머지 노드들
+		return '#8468b3';
+	};
+
 	// 네트워크 그래프 노드 및 엣지 생성
 	const { nodes, edges } = useMemo(() => {
 		// 노드 Map: id를 키로 하여 중복 제거
@@ -119,10 +137,12 @@ const CompanyNetworkGraph: FC<CompanyNetworkGraphProps> = ({ companyData }) => {
 
 			// 노드 추가 (이미 있으면 스킵)
 			if (!nodeMap.has(relatedId)) {
+				const tags = related.tags || [];
+				const nodeColor = getNodeColor(tags);
 				nodeMap.set(relatedId, {
 					id: relatedId,
 					label: related.name,
-					fill: '#e5e7eb', // gray-200
+					fill: nodeColor,
 					size: 40,
 					data: related,
 				});
@@ -195,6 +215,59 @@ const CompanyNetworkGraph: FC<CompanyNetworkGraphProps> = ({ companyData }) => {
 		selections: [centerNodeId],
 		actives: [centerNodeId],
 	});
+
+	// 노드 색상을 동적으로 업데이트 (actives, selections, hoveredNode에 따라)
+	const coloredNodes = useMemo(() => {
+		const activeNodeIds = new Set<string>();
+
+		// actives에서 노드 ID 추출
+		if (Array.isArray(actives)) {
+			actives.forEach((n) => {
+				if (typeof n === 'object' && n !== null && 'id' in n) {
+					activeNodeIds.add((n as GraphNode).id);
+				} else if (typeof n === 'string') {
+					activeNodeIds.add(n);
+				}
+			});
+		}
+
+		// selections에서 노드 ID 추출
+		if (Array.isArray(selections)) {
+			selections.forEach((n) => {
+				if (typeof n === 'object' && n !== null && 'id' in n) {
+					activeNodeIds.add((n as GraphNode).id);
+				} else if (typeof n === 'string') {
+					activeNodeIds.add(n);
+				}
+			});
+		}
+
+		// hoveredNode 추가
+		if (hoveredNode) {
+			activeNodeIds.add(hoveredNode.node.id);
+		}
+
+		return nodes.map((node) => {
+			// 중심 노드는 항상 원래 색상 유지
+			if (node.id === centerNodeId) {
+				return node;
+			}
+
+			// 활성화된 노드인 경우 원래 색상으로 하이라이트
+			if (activeNodeIds.has(node.id)) {
+				// 노드의 원래 색상 가져오기 (data에서 tags 확인)
+				const nodeData = node.data as Company | undefined;
+				const tags = nodeData?.tags || [];
+				const highlightColor = getNodeColor(tags);
+				return {
+					...node,
+					fill: highlightColor,
+				};
+			}
+
+			return node;
+		});
+	}, [nodes, actives, selections, hoveredNode, centerNodeId]);
 
 	// 노드 클릭 핸들러 (모바일용)
 	const handleNodeClick = (node: any) => {
@@ -308,7 +381,7 @@ const CompanyNetworkGraph: FC<CompanyNetworkGraphProps> = ({ companyData }) => {
 			</div>
 			<GraphCanvas
 				ref={graphRef}
-				nodes={nodes}
+				nodes={coloredNodes}
 				edges={edges}
 				selections={selections}
 				actives={actives}
