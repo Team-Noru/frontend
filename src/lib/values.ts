@@ -21,6 +21,9 @@ export const getStockImageUrl = (code?: string, isDomestic: boolean = true) => {
 		return null;
 	}
 	if (isDomestic) {
+		if (process.env.NODE_ENV === 'production') {
+			return `https://noru-stock-images.s3.ap-northeast-2.amazonaws.com/logos/${code}.png`;
+		}
 		const encodedUrl = encodeURIComponent(
 			`https://static.toss.im/png-icons/securities/icn-sec-fill-${code}.png`
 		);

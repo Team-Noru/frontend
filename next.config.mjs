@@ -5,6 +5,12 @@ const nextConfig = {
 			{
 				protocol: 'https',
 				hostname: 'images.tossinvest.com',
+				pathname: '**',
+			},
+			{
+				protocol: 'https',
+				hostname: 'noru-stock-images.s3.ap-northeast-2.amazonaws.com',
+				pathname: '**',
 			},
 		],
 	},
