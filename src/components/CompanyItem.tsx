@@ -219,7 +219,7 @@ const CompanyItem: FC<Props> = ({
 						<div className="space-y-2">
 							{selectedTag.relReasons.map((reason, index) => (
 								<div key={index} className="text-sm text-foreground">
-									- {reason}
+									• {reason}
 								</div>
 							))}
 						</div>
