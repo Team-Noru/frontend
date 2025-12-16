@@ -8,6 +8,9 @@
  * @returns 정제된 문자열
  */
 export const sanitizeInput = (input: string): string => {
+	// 빈 문자열이면 빈 문자열 반환
+	if (!input) return '';
+
 	// 최대 길이 제한 (100자)
 	const maxLength = 100;
 	let sanitized = input.slice(0, maxLength);
@@ -38,7 +41,9 @@ export const sanitizeInput = (input: string): string => {
 	// 연속된 공백을 하나로 제한
 	sanitized = sanitized.replace(/\s+/g, ' ');
 
-	return sanitized.trim();
+	// trim 후 빈 문자열이면 빈 문자열 반환
+	const trimmed = sanitized.trim();
+	return trimmed;
 };
 
 /**

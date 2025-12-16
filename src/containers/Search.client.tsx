@@ -36,6 +36,12 @@ const SearchClient = () => {
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const rawValue = e.target.value;
 
+		// 빈 문자열이면 바로 빈 문자열로 설정 (검증 건너뛰기)
+		if (!rawValue.trim()) {
+			setSearchQuery('');
+			return;
+		}
+
 		// 입력 검증
 		if (!isValidInput(rawValue)) {
 			toast.error('유효하지 않은 입력입니다.');

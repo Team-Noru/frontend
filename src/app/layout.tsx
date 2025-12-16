@@ -45,7 +45,7 @@ export default function RootLayout({
 					<Header />
 					<div className="flex-1 overflow-hidden">{children}</div>
 				</QueryClientProvider>
-				<Toaster position="top-right" />
+				<Toaster position="bottom-right" />
 			</body>
 		</html>
 	);
