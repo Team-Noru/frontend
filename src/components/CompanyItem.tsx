@@ -49,7 +49,7 @@ const CompanyItem: FC<Props> = ({
 	// 바텀시트 상태
 	const [selectedTag, setSelectedTag] = useState<{
 		tag: Tag;
-		relReasons: (string | null)[];
+		relReasons: { reason: string | null; newsId?: number }[];
 	} | null>(null);
 
 	// tag.label을 한글로 변환하는 함수
@@ -66,21 +66,29 @@ const CompanyItem: FC<Props> = ({
 	const groupedTags = useMemo(() => {
 		const tagMap = new Map<
 			string,
-			{ tag: Tag; relReasons: (string | null)[] }
+			{ tag: Tag; relReasons: { reason: string | null; newsId?: number }[] }
 		>();
 		tags.forEach((tag) => {
 			const existing = tagMap.get(tag.label);
 			if (tag.relReason) {
+				const relReasonItem = {
+					reason: tag.relReason,
+					newsId: tag.newsId,
+				};
 				if (existing) {
-					// 중복된 label이 있으면 relReason만 추가
-					if (!existing.relReasons.includes(tag.relReason)) {
-						existing.relReasons.push(tag.relReason);
+					// 중복된 label이 있으면 relReason만 추가 (newsId 포함)
+					const exists = existing.relReasons.some(
+						(item) =>
+							item.reason === tag.relReason && item.newsId === tag.newsId
+					);
+					if (!exists) {
+						existing.relReasons.push(relReasonItem);
 					}
 				} else {
 					// 새로운 label이면 새로 추가
 					tagMap.set(tag.label, {
 						tag,
-						relReasons: [tag.relReason],
+						relReasons: [relReasonItem],
 					});
 				}
 			}
@@ -181,16 +189,12 @@ const CompanyItem: FC<Props> = ({
 				>
 					{groupedTags.map(({ tag, relReasons }) => {
 						const translatedLabel = translateTagLabel(tag.label);
-						const tooltipText = relReasons
-							.map((reason) => `· ${reason}`)
-							.join('\n');
 						// 변환된 label을 가진 tag 객체 생성
 						const translatedTag = { ...tag, label: translatedLabel };
 						return (
 							<TagWithTooltip
 								key={`${companyId}-${tag.label}-${tag.id}`}
 								tag={translatedTag}
-								tooltipText={tooltipText}
 								relReasons={relReasons}
 								onMobileClick={() =>
 									isMobile &&
@@ -222,9 +226,36 @@ const CompanyItem: FC<Props> = ({
 						title={selectedTag.tag.label}
 					>
 						<div className="space-y-2">
-							{selectedTag.relReasons.map((reason, index) => (
+							{selectedTag.relReasons.map((item, index) => (
 								<div key={index} className="text-sm text-foreground">
-									• {reason}
+									{item.newsId ? (
+										<Link
+											href={`/news/${item.newsId}`}
+											className="flex items-center gap-1.5 hover:underline"
+											onClick={() => setSelectedTag(null)}
+										>
+											•
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												width="14"
+												height="14"
+												viewBox="0 0 24 24"
+												fill="none"
+												stroke="currentColor"
+												strokeWidth="2"
+												strokeLinecap="round"
+												strokeLinejoin="round"
+												className="shrink-0"
+											>
+												<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+												<polyline points="15 3 21 3 21 9" />
+												<line x1="10" y1="14" x2="21" y2="3" />
+											</svg>
+											<span>{item.reason}</span>
+										</Link>
+									) : (
+										<span>• {item.reason}</span>
+									)}
 								</div>
 							))}
 						</div>
@@ -245,9 +276,35 @@ const CompanyItem: FC<Props> = ({
 					title={selectedTag.tag.label}
 				>
 					<div className="space-y-2">
-						{selectedTag.relReasons.map((reason, index) => (
+						{selectedTag.relReasons.map((item, index) => (
 							<div key={index} className="text-sm text-foreground">
-								- {reason}
+								{item.newsId ? (
+									<Link
+										href={`/news/${item.newsId}`}
+										className="flex items-center gap-1.5 hover:underline"
+										onClick={() => setSelectedTag(null)}
+									>
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											width="14"
+											height="14"
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke="currentColor"
+											strokeWidth="2"
+											strokeLinecap="round"
+											strokeLinejoin="round"
+											className="shrink-0"
+										>
+											<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+											<polyline points="15 3 21 3 21 9" />
+											<line x1="10" y1="14" x2="21" y2="3" />
+										</svg>
+										<span>- {item.reason}</span>
+									</Link>
+								) : (
+									<span>- {item.reason}</span>
+								)}
 							</div>
 						))}
 					</div>

@@ -2,6 +2,8 @@
 
 import { FC } from 'react';
 
+import Link from 'next/link';
+
 import {
 	Tooltip,
 	TooltipContent,
@@ -12,15 +14,14 @@ import { Tag } from '@/types/company';
 
 interface TagWithTooltipProps {
 	tag: Tag;
-	tooltipText: string | null;
-	relReasons: (string | null)[];
+	relReasons: { reason: string | null; newsId?: number }[];
 	onMobileClick?: () => void;
 	isMobile: boolean;
 }
 
 export const TagWithTooltip: FC<TagWithTooltipProps> = ({
 	tag,
-	tooltipText,
+	relReasons,
 	onMobileClick,
 	isMobile,
 }) => {
@@ -44,21 +45,59 @@ export const TagWithTooltip: FC<TagWithTooltipProps> = ({
 		</span>
 	);
 
-	// 모바일이거나 tooltipText가 없으면 Tooltip 없이 반환
-	if (isMobile || !tooltipText) {
+	// relReasons가 없거나 모바일이면 Tooltip 없이 반환
+	if (isMobile || !relReasons || relReasons.length === 0) {
 		return tagElement;
 	}
 
-	// 데스크탑에서 tooltipText가 있으면 Tooltip으로 감싸서 반환
+	// Tooltip 내용 렌더링
+	const tooltipContent = (
+		<div className="space-y-1">
+			{relReasons.map((item, index) => (
+				<div key={index} className="text-xs">
+					{item.newsId ? (
+						<Link
+							href={`/news/${item.newsId}`}
+							className="flex items-center gap-1.5 hover:underline"
+							onClick={(e) => e.stopPropagation()}
+						>
+							•
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="12"
+								height="12"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								strokeWidth="2"
+								strokeLinecap="round"
+								strokeLinejoin="round"
+								className="shrink-0"
+							>
+								<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+								<polyline points="15 3 21 3 21 9" />
+								<line x1="10" y1="14" x2="21" y2="3" />
+							</svg>
+							<span>{item.reason}</span>
+						</Link>
+					) : (
+						<span>· {item.reason}</span>
+					)}
+				</div>
+			))}
+		</div>
+	);
+
+	// 데스크탑에서 relReasons가 있으면 Tooltip으로 감싸서 반환
 	return (
 		<Tooltip>
 			<TooltipTrigger asChild>{tagElement}</TooltipTrigger>
 			<TooltipContent
 				side="top"
 				sideOffset={8}
-				className="max-w-[250px] whitespace-pre-line text-left bg-gray-900 dark:bg-gray-800 text-white"
+				className="max-w-[250px] text-left bg-gray-900 dark:bg-gray-800 text-white"
 			>
-				{tooltipText}
+				{tooltipContent}
 			</TooltipContent>
 		</Tooltip>
 	);

@@ -10,6 +10,7 @@ export interface Tag {
 	direction: 'IN' | 'OUT';
 	label: string;
 	relReason: string | null;
+	newsId?: number;
 }
 
 export interface Company {
