@@ -24,7 +24,7 @@ const HomeClientContainer: React.FC<Props> = ({ newsData, companies }) => {
 					{/* 왼쪽: 뉴스 목록 */}
 					<div className="flex-1">
 						<h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">
-							오늘의 뉴스
+							최근 뉴스
 						</h2>
 						<div className="space-y-2">
 							{newsData && newsData.length > 0 ? (
@@ -41,7 +41,7 @@ const HomeClientContainer: React.FC<Props> = ({ newsData, companies }) => {
 								))
 							) : (
 								<div className="text-center py-8 text-gray-500">
-									오늘의 뉴스가 없습니다.
+									최근 뉴스가 없습니다.
 								</div>
 							)}
 						</div>

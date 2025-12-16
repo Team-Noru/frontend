@@ -1,6 +1,6 @@
 'use client';
 
-import { FC, useEffect, useMemo, useRef, useState } from 'react';
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import dynamic from 'next/dynamic';
 
@@ -87,8 +87,8 @@ const CompanyNetworkGraph: FC<CompanyNetworkGraphProps> = ({ companyData }) => {
 		'in' | 'out' | 'all'
 	>('in');
 
-	// 노드 색상 결정 함수
-	const getNodeColor = (tags: Company['tags'] = []): string => {
+	// 노드 색상 결정 함수 (메모이제이션)
+	const getNodeColor = useCallback((tags: Company['tags'] = []): string => {
 		// 1. label='투자사'인 경우
 		const hasInvestorTag = tags.some((tag) => tag.label === '투자사');
 		if (hasInvestorTag) {
@@ -103,7 +103,7 @@ const CompanyNetworkGraph: FC<CompanyNetworkGraphProps> = ({ companyData }) => {
 
 		// 3. 이외 나머지 노드들
 		return '#8468b3';
-	};
+	}, []);
 
 	// 네트워크 그래프 노드 및 엣지 생성
 	const { nodes, edges } = useMemo(() => {
@@ -181,12 +181,6 @@ const CompanyNetworkGraph: FC<CompanyNetworkGraphProps> = ({ companyData }) => {
 
 		// 엣지 배열로 변환 (가중치에 따라 size 조정, 방향에 따라 색상)
 		const graphEdges = Array.from(edgeMap.values()).map((edge) => {
-			// 가중치에 따라 두께 조정 (최소 2, 최대 8)
-			// const edgeSize = Math.min(2 + edge.weight * 2, 8);
-
-			// 방향 결정: 더 많은 방향을 우선
-			// const isIn = edge.inCount > edge.outCount;
-			// const fill = isIn ? '#3b82f6' : '#10b981'; // IN: blue-500, OUT: green-500
 			const label = edge.weight > 1 ? `${edge.weight}` : '';
 
 			return {
@@ -212,8 +206,6 @@ const CompanyNetworkGraph: FC<CompanyNetworkGraphProps> = ({ companyData }) => {
 		nodes,
 		edges,
 		pathSelectionType,
-		selections: [centerNodeId],
-		actives: [centerNodeId],
 	});
 
 	// 노드 색상을 동적으로 업데이트 (actives, selections, hoveredNode에 따라)
@@ -253,21 +245,27 @@ const CompanyNetworkGraph: FC<CompanyNetworkGraphProps> = ({ companyData }) => {
 				return node;
 			}
 
+			// 노드의 원래 색상 가져오기 (data에서 tags 확인)
+			const nodeData = node.data as Company | undefined;
+			const tags = nodeData?.tags || [];
+			const nodeColor = getNodeColor(tags);
+
 			// 활성화된 노드인 경우 원래 색상으로 하이라이트
 			if (activeNodeIds.has(node.id)) {
-				// 노드의 원래 색상 가져오기 (data에서 tags 확인)
-				const nodeData = node.data as Company | undefined;
-				const tags = nodeData?.tags || [];
-				const highlightColor = getNodeColor(tags);
 				return {
 					...node,
-					fill: highlightColor,
+					fill: nodeColor,
 				};
 			}
 
-			return node;
+			// 비활성화된 노드는 원래 색상 유지 (약간 투명하게)
+			return {
+				...node,
+				fill: nodeColor,
+				opacity: 0.3,
+			};
 		});
-	}, [nodes, actives, selections, hoveredNode, centerNodeId]);
+	}, [nodes, actives, selections, hoveredNode, centerNodeId, getNodeColor]);
 
 	// 노드 클릭 핸들러 (모바일용)
 	const handleNodeClick = (node: any) => {
