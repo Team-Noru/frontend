@@ -78,7 +78,7 @@ const HomeClientContainer: React.FC<Props> = ({ newsData, companies }) => {
 				<div className="lg:hidden">
 					<Tabs value={activeTab} onValueChange={setActiveTab}>
 						<TabsList>
-							<TabsTrigger value="news">오늘의 뉴스</TabsTrigger>
+							<TabsTrigger value="news">최근 뉴스</TabsTrigger>
 							<TabsTrigger value="companies">기업 목록</TabsTrigger>
 						</TabsList>
 						<TabsContent value="news" className="mt-6">
@@ -97,7 +97,7 @@ const HomeClientContainer: React.FC<Props> = ({ newsData, companies }) => {
 									))
 								) : (
 									<div className="text-center py-8 text-gray-500">
-										오늘의 뉴스가 없습니다.
+										최근 뉴스가 없습니다.
 									</div>
 								)}
 							</div>
