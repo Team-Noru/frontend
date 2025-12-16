@@ -2,14 +2,13 @@
 
 import { FC, useMemo, useState, useEffect, useRef } from 'react';
 
-import dynamic from 'next/dynamic';
 import Image from 'next/image';
 
 import { scaleLog } from '@visx/scale';
 import { Text } from '@visx/text';
 import { Wordcloud } from '@visx/wordcloud';
-import { GraphEdge, GraphNode } from 'reagraph';
 
+import CompanyNetworkGraph from '@/components/company/CompanyNetworkGraph';
 import CompanyItem from '@/components/CompanyItem';
 import NewsItem from '@/components/NewsItem';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -34,11 +33,6 @@ interface Props {
 	announcementsData: Announcement[];
 }
 
-const GraphCanvas = dynamic(
-	() => import('reagraph').then((mod) => mod.GraphCanvas),
-	{ ssr: false }
-);
-
 const CompanyDetailClientContainer: FC<Props> = ({
 	companyData,
 	wordCloudData,
@@ -46,37 +40,6 @@ const CompanyDetailClientContainer: FC<Props> = ({
 	announcementsData,
 }) => {
 	const [activeTab, setActiveTab] = useState('network');
-
-	// 네트워크 그래프 노드 및 엣지 생성
-	const { nodes, edges } = useMemo(() => {
-		const graphNodes = [
-			{
-				id: companyData.companyId,
-				label: companyData.name,
-				fill: '#10b981', // green-500
-				size: 50,
-				data: companyData,
-			},
-			...companyData.related.map((related) => ({
-				id: related.companyId || related.name,
-				label: related.name,
-				fill: '#e5e7eb', // gray-200
-				size: 40,
-				data: related,
-			})),
-		];
-
-		const graphEdges = companyData.related.map((related) => ({
-			id: `${companyData.companyId}-${related.companyId || related.name}`,
-			source: companyData.companyId,
-			target: related.companyId || related.name,
-			label: '',
-			size: 2,
-			fill: '#10b981', // green-500
-		}));
-
-		return { nodes: graphNodes, edges: graphEdges };
-	}, [companyData]);
 
 	// 연관 기업 정렬: companyId가 있는 회사를 우선, 그 다음 isDomestic && isListed > isDomestic && !isListed > !isDomestic
 	const sortedRelatedCompanies = useMemo(() => {
@@ -283,15 +246,8 @@ const CompanyDetailClientContainer: FC<Props> = ({
 						<h2 className="text-2xl font-bold">기업 정보</h2>
 						{/* 네트워크 그래프 */}
 						<div className="h-[600px] w-full border border-border rounded-lg overflow-hidden bg-white relative">
-							<GraphCanvas
-								nodes={nodes as GraphNode[]}
-								edges={edges as GraphEdge[]}
-								layoutType="forceDirected2d"
-								labelType="all"
-								edgeInterpolation="curved"
-							/>
+							<CompanyNetworkGraph companyData={companyData} />
 						</div>
-
 						{/* 워드 클라우드 */}
 						<div className="border border-border rounded-lg p-6 bg-white">
 							<div className="flex justify-between items-center mb-4">
@@ -468,15 +424,8 @@ const CompanyDetailClientContainer: FC<Props> = ({
 						<TabsContent value="network" className="mt-6 space-y-4">
 							{/* 네트워크 그래프 */}
 							<div className="h-[300px] w-full border border-border rounded-lg overflow-hidden bg-white relative">
-								<GraphCanvas
-									nodes={nodes as GraphNode[]}
-									edges={edges as GraphEdge[]}
-									layoutType="forceDirected2d"
-									labelType="all"
-									edgeInterpolation="curved"
-								/>
+								<CompanyNetworkGraph companyData={companyData} />
 							</div>
-
 							{/* 워드 클라우드 */}
 							<div className="border border-border rounded-lg p-4 bg-white">
 								<div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0 mb-4">
