@@ -7,6 +7,11 @@ import dynamic from 'next/dynamic';
 import { GraphNode, useSelection } from 'reagraph';
 
 import BottomSheet from '@/components/ui/bottom-sheet';
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { Company, CompanyDetail } from '@/types/company';
 
@@ -86,6 +91,7 @@ const CompanyNetworkGraph: FC<CompanyNetworkGraphProps> = ({ companyData }) => {
 	const [pathSelectionType, setPathSelectionType] = useState<
 		'in' | 'out' | 'all'
 	>('in');
+	const [showHelpBottomSheet, setShowHelpBottomSheet] = useState(false);
 
 	// 노드 색상 결정 함수 (메모이제이션)
 	const getNodeColor = useCallback((tags: Company['tags'] = []): string => {
@@ -335,10 +341,71 @@ const CompanyNetworkGraph: FC<CompanyNetworkGraphProps> = ({ companyData }) => {
 		<>
 			{/* 방향 선택 UI */}
 			<div className="flex justify-between items-center mb-4">
-				<h3 className="absolute top-6 left-6 z-10 text-base sm:text-lg font-bold">
-					관계도
-				</h3>
-				<div className="absolute top-4 right-4 z-10 flex gap-1 sm:gap-2 bg-white/90 backdrop-blur-sm border border-border rounded-lg p-0.5 sm:p-1">
+				<div className="absolute top-2 left-2 sm:top-6 sm:left-6 z-10 flex items-center gap-2">
+					<h3 className="text-base sm:text-lg font-bold">관계도</h3>
+					{/* 도움말 아이콘 */}
+					{isMobile ? (
+						<button
+							type="button"
+							onClick={() => setShowHelpBottomSheet(true)}
+							className="flex items-center justify-center w-5 h-5 rounded-full bg-muted hover:bg-muted/80 transition-colors cursor-pointer"
+							aria-label="도움말"
+						>
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="14"
+								height="14"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								strokeWidth="2"
+								strokeLinecap="round"
+								strokeLinejoin="round"
+								className="text-muted-foreground"
+							>
+								<circle cx="12" cy="12" r="10" />
+								<path d="M12 16v-4M12 8h.01" />
+							</svg>
+						</button>
+					) : (
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<button
+									type="button"
+									className="flex items-center justify-center w-5 h-5 rounded-full bg-muted hover:bg-muted/80 transition-colors cursor-help"
+									aria-label="도움말"
+								>
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										width="14"
+										height="14"
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										strokeWidth="2"
+										strokeLinecap="round"
+										strokeLinejoin="round"
+										className="text-muted-foreground"
+									>
+										<circle cx="12" cy="12" r="10" />
+										<path d="M12 16v-4M12 8h.01" />
+									</svg>
+								</button>
+							</TooltipTrigger>
+							<TooltipContent
+								side="bottom"
+								sideOffset={8}
+								className="max-w-xs text-sm"
+							>
+								<div className="space-y-1">
+									<p className="font-medium">기업을 클릭하거나 호버하여</p>
+									<p>기업 간 연관 관계를 확인할 수 있습니다.</p>
+								</div>
+							</TooltipContent>
+						</Tooltip>
+					)}
+				</div>
+				<div className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10 flex gap-1 sm:gap-2 bg-white/90 backdrop-blur-sm border border-border rounded-lg p-0.5 sm:p-1">
 					<button
 						type="button"
 						onClick={() => setPathSelectionType('in')}
@@ -375,6 +442,47 @@ const CompanyNetworkGraph: FC<CompanyNetworkGraphProps> = ({ companyData }) => {
 					>
 						ALL
 					</button>
+				</div>
+			</div>
+			{/* 기업 색상 범례 */}
+			<div className="absolute bottom-2 left-2 sm:bottom-6 sm:left-6 z-10">
+				<div className="space-y-1 sm:space-y-1.5">
+					<div className="flex items-center gap-1.5 sm:gap-2">
+						<div
+							className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full shrink-0"
+							style={{ backgroundColor: '#3b83f6' }}
+						/>
+						<span className="text-[10px] sm:text-xs lg:text-sm text-foreground">
+							대상 기업
+						</span>
+					</div>
+					<div className="flex items-center gap-1.5 sm:gap-2">
+						<div
+							className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full shrink-0"
+							style={{ backgroundColor: '#dc9192' }}
+						/>
+						<span className="text-[10px] sm:text-xs lg:text-sm text-foreground">
+							투자사
+						</span>
+					</div>
+					<div className="flex items-center gap-1.5 sm:gap-2">
+						<div
+							className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full shrink-0"
+							style={{ backgroundColor: '#efe298' }}
+						/>
+						<span className="text-[10px] sm:text-xs lg:text-sm text-foreground">
+							뉴스 연관
+						</span>
+					</div>
+					<div className="flex items-center gap-1.5 sm:gap-2">
+						<div
+							className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full shrink-0"
+							style={{ backgroundColor: '#8468b3' }}
+						/>
+						<span className="text-[10px] sm:text-xs lg:text-sm text-foreground">
+							공시 연관
+						</span>
+					</div>
 				</div>
 			</div>
 			<GraphCanvas
@@ -419,6 +527,36 @@ const CompanyNetworkGraph: FC<CompanyNetworkGraphProps> = ({ companyData }) => {
 					title={nodeRelations.name}
 				>
 					<RelationsContent relations={nodeRelations} />
+				</BottomSheet>
+			)}
+			{/* 도움말 바텀시트 (모바일용) */}
+			{isMobile && (
+				<BottomSheet
+					open={showHelpBottomSheet}
+					onClose={() => setShowHelpBottomSheet(false)}
+					title="도움말"
+				>
+					<div className="space-y-3 text-sm">
+						<p className="text-foreground">
+							기업을 탭하여 기업 간 연관 관계를 확인할 수 있습니다.
+						</p>
+						<div className="space-y-2">
+							<div>
+								<p className="font-medium text-foreground mb-1">
+									IN/OUT/ALL 버튼
+								</p>
+								<p className="text-muted-foreground">
+									관계 방향을 필터링하여 볼 수 있습니다.
+								</p>
+							</div>
+							<div>
+								<p className="font-medium text-foreground mb-1">색상 구분</p>
+								<p className="text-muted-foreground">
+									각 색상은 기업의 유형을 나타냅니다.
+								</p>
+							</div>
+						</div>
+					</div>
 				</BottomSheet>
 			)}
 		</>

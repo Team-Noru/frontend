@@ -5,7 +5,7 @@ import { Toaster } from 'sonner';
 import Header from '@/components/Header';
 import QueryClientProvider from '@/components/providers/QueryClientProvider';
 
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 
 import './globals.css';
 
@@ -29,6 +29,16 @@ export const metadata: Metadata = {
 		type: 'website',
 		title: 'LINKompany',
 	},
+};
+
+export const viewport: Viewport = {
+	themeColor: '#ffffff',
+	initialScale: 1,
+	width: 'device-width',
+	minimumScale: 1,
+	maximumScale: 1,
+	userScalable: false,
+	viewportFit: 'cover',
 };
 
 export default function RootLayout({
