@@ -46,6 +46,40 @@ const NewsDetailClient: FC<Props> = ({ newsData }) => {
 									</span>
 								</div>
 							</header>
+							{/* AI 뉴스 요약 */}
+							{newsData.summary && (
+								<div className="rounded-2xl p-4 sm:p-5 bg-gradient-to-br from-blue-50/80 via-purple-50/60 to-blue-100/40 border border-blue-100/50 shadow-sm">
+									<div className="flex items-start gap-3">
+										{/* AI 아이콘 */}
+										<div className="shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white border-2 border-blue-400/60 flex items-center justify-center shadow-sm">
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												width="20"
+												height="20"
+												viewBox="0 0 24 24"
+												fill="none"
+												stroke="currentColor"
+												strokeWidth="2"
+												strokeLinecap="round"
+												strokeLinejoin="round"
+												className="text-blue-500"
+											>
+												<path d="M12 2L2 7l10 5 10-5-10-5z" />
+												<path d="M2 17l10 5 10-5M2 12l10 5 10-5" />
+											</svg>
+										</div>
+										{/* 요약 내용 */}
+										<div className="flex-1 min-w-0">
+											<h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">
+												AI 뉴스 요약
+											</h3>
+											<p className="text-sm sm:text-base text-gray-700 leading-relaxed whitespace-pre-line">
+												{newsData.summary}
+											</p>
+										</div>
+									</div>
+								</div>
+							)}
 							{/* 본문 */}
 							<div className="prose prose-sm sm:prose-base md:prose-lg max-w-none space-y-4">
 								{newsData.content
@@ -203,6 +237,40 @@ const NewsDetailClient: FC<Props> = ({ newsData }) => {
 										</span>
 									</div>
 								</header>
+								{/* AI 뉴스 요약 */}
+								{newsData.summary && (
+									<div className="rounded-2xl p-4 sm:p-5 bg-linear-to-br from-blue-50/80 via-purple-50/60 to-blue-100/40 border border-blue-100/50 shadow-sm">
+										<div className="flex items-start gap-3">
+											{/* AI 아이콘 */}
+											<div className="shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white border-2 border-blue-400/60 flex items-center justify-center shadow-sm">
+												<svg
+													xmlns="http://www.w3.org/2000/svg"
+													width="20"
+													height="20"
+													viewBox="0 0 24 24"
+													fill="none"
+													stroke="currentColor"
+													strokeWidth="2"
+													strokeLinecap="round"
+													strokeLinejoin="round"
+													className="text-blue-500"
+												>
+													<path d="M12 2L2 7l10 5 10-5-10-5z" />
+													<path d="M2 17l10 5 10-5M2 12l10 5 10-5" />
+												</svg>
+											</div>
+											{/* 요약 내용 */}
+											<div className="flex-1 min-w-0">
+												<h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">
+													AI 뉴스 요약
+												</h3>
+												<p className="text-sm sm:text-base text-gray-700 leading-relaxed whitespace-pre-line">
+													{newsData.summary}
+												</p>
+											</div>
+										</div>
+									</div>
+								)}
 								{/* 본문 */}
 								<div className="prose prose-sm sm:prose-base max-w-none space-y-4">
 									{newsData.content

@@ -15,6 +15,7 @@ export interface NewsDetail extends News {
 	contentUrl: string;
 	imageUrl: string[];
 	name: string;
+	summary: string | null;
 	companies: Company[];
 	related: Company[];
 }
