@@ -79,7 +79,7 @@ const CompanyNetworkGraph: FC<CompanyNetworkGraphProps> = ({ companyData }) => {
 	const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
 	const [pathSelectionType, setPathSelectionType] = useState<
 		'in' | 'out' | 'all'
-	>('out');
+	>('in');
 
 	// 네트워크 그래프 노드 및 엣지 생성
 	const { nodes, edges } = useMemo(() => {
@@ -90,8 +90,8 @@ const CompanyNetworkGraph: FC<CompanyNetworkGraphProps> = ({ companyData }) => {
 		nodeMap.set(centerNodeId, {
 			id: centerNodeId,
 			label: companyData.name,
-			fill: '#10b981', // green-500
-			size: 50,
+			fill: '#3b83f6',
+			size: 40,
 			data: companyData,
 		});
 
@@ -156,11 +156,11 @@ const CompanyNetworkGraph: FC<CompanyNetworkGraphProps> = ({ companyData }) => {
 		// 엣지 배열로 변환 (가중치에 따라 size 조정, 방향에 따라 색상)
 		const graphEdges = Array.from(edgeMap.values()).map((edge) => {
 			// 가중치에 따라 두께 조정 (최소 2, 최대 8)
-			const edgeSize = Math.min(2 + edge.weight * 2, 8);
+			// const edgeSize = Math.min(2 + edge.weight * 2, 8);
 
 			// 방향 결정: 더 많은 방향을 우선
-			const isIn = edge.inCount > edge.outCount;
-			const fill = isIn ? '#3b82f6' : '#10b981'; // IN: blue-500, OUT: green-500
+			// const isIn = edge.inCount > edge.outCount;
+			// const fill = isIn ? '#3b82f6' : '#10b981'; // IN: blue-500, OUT: green-500
 			const label = edge.weight > 1 ? `${edge.weight}` : '';
 
 			return {
@@ -168,8 +168,8 @@ const CompanyNetworkGraph: FC<CompanyNetworkGraphProps> = ({ companyData }) => {
 				source: edge.source,
 				target: edge.target,
 				label,
-				size: edgeSize,
-				fill,
+				size: 1,
+				fill: '#DBDBDB',
 			};
 		});
 
@@ -186,6 +186,8 @@ const CompanyNetworkGraph: FC<CompanyNetworkGraphProps> = ({ companyData }) => {
 		nodes,
 		edges,
 		pathSelectionType,
+		selections: [centerNodeId],
+		actives: [centerNodeId],
 	});
 
 	// 노드 클릭 핸들러 (모바일용)
@@ -256,7 +258,7 @@ const CompanyNetworkGraph: FC<CompanyNetworkGraphProps> = ({ companyData }) => {
 		<>
 			{/* 방향 선택 UI */}
 			<div className="flex justify-between items-center mb-4">
-				<h3 className="absolute top-4 left-4 z-10 text-base sm:text-lg font-bold">
+				<h3 className="absolute top-6 left-6 z-10 text-base sm:text-lg font-bold">
 					관계도
 				</h3>
 				<div className="absolute top-4 right-4 z-10 flex gap-1 sm:gap-2 bg-white/90 backdrop-blur-sm border border-border rounded-lg p-0.5 sm:p-1">

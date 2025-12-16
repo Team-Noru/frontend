@@ -1,27 +1,22 @@
 'use client';
 
-import { FC, useMemo, useState, useEffect, useRef } from 'react';
+import { FC, useMemo, useState } from 'react';
 
 import Image from 'next/image';
 
-import { scaleLog } from '@visx/scale';
-import { Text } from '@visx/text';
-import { Wordcloud } from '@visx/wordcloud';
-
 import CompanyNetworkGraph from '@/components/company/CompanyNetworkGraph';
+import CompanyWordCloud from '@/components/company/CompanyWordCloud';
 import CompanyItem from '@/components/CompanyItem';
 import NewsItem from '@/components/NewsItem';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { getColorByType } from '@/lib/color';
 import { formatPrice } from '@/lib/format';
 import { sortCompanies } from '@/lib/sort';
 import { cn } from '@/lib/utils';
-import { getLabelByType, getStockImageUrl } from '@/lib/values';
+import { getStockImageUrl } from '@/lib/values';
 import {
 	Announcement,
 	CompanyDetail,
 	Sentiment,
-	WordData,
 	WordDataDTO,
 } from '@/types/company';
 import { News } from '@/types/news';
@@ -45,133 +40,6 @@ const CompanyDetailClientContainer: FC<Props> = ({
 	const sortedRelatedCompanies = useMemo(() => {
 		return sortCompanies(companyData.related);
 	}, [companyData.related]);
-
-	// WordDataDTO를 WordData로 변환
-	const transformedWordCloudData = useMemo(() => {
-		return wordCloudData.map((word) => ({
-			text: word.text,
-			value: word.weight,
-			type: word.type,
-		}));
-	}, [wordCloudData]);
-
-	// 모바일 여부 감지
-	const [isMobile, setIsMobile] = useState(false);
-
-	useEffect(() => {
-		const checkMobile = () => {
-			setIsMobile(window.innerWidth < 1024); // lg 브레이크포인트
-		};
-		checkMobile();
-		window.addEventListener('resize', checkMobile);
-		return () => window.removeEventListener('resize', checkMobile);
-	}, []);
-
-	// 워드 클라우드 설정 (모바일일 때 글자 크기 축소)
-	const fontScale = useMemo(() => {
-		if (transformedWordCloudData.length === 0) {
-			// 빈 데이터일 때 기본 스케일 반환
-			return scaleLog({
-				domain: [1, 100],
-				range: isMobile ? [12, 40] : [20, 80],
-			});
-		}
-		const values = transformedWordCloudData.map((w) => w.value);
-		return scaleLog({
-			domain: [Math.min(...values), Math.max(...values)],
-			range: isMobile ? [12, 40] : [20, 80], // 모바일: 12-40, 데스크탑: 20-80
-		});
-	}, [transformedWordCloudData, isMobile]);
-	const fontSizeSetter = (datum: WordData) => fontScale(datum.value);
-
-	// 워드 클라우드 크기 계산 (반응형)
-	const [wordCloudSize, setWordCloudSize] = useState({
-		width: 600,
-		height: 300,
-	});
-	const wordCloudContainerRef = useRef<HTMLDivElement>(null);
-	const wordCloudMobileContainerRef = useRef<HTMLDivElement>(null);
-
-	useEffect(() => {
-		const updateSize = () => {
-			// 데스크탑과 모바일 컨테이너 크기 확인
-			const desktopContainer = wordCloudContainerRef.current;
-			const mobileContainer = wordCloudMobileContainerRef.current;
-
-			// 데스크톱 환경에서는 desktopContainer 사용
-			if (desktopContainer && !isMobile) {
-				const containerRect = desktopContainer.getBoundingClientRect();
-				// 컨테이너가 실제로 렌더링되었는지 확인 (width > 0)
-				if (containerRect.width > 0) {
-					const width = Math.max(400, containerRect.width - 48); // padding 고려
-					const height = Math.min(300, width * 0.5);
-					setWordCloudSize({ width, height });
-					return;
-				}
-			}
-
-			// 모바일 환경에서는 mobileContainer 사용 (activeTab이 'network'일 때만)
-			if (mobileContainer && isMobile && activeTab === 'network') {
-				const containerRect = mobileContainer.getBoundingClientRect();
-				if (containerRect.width > 0) {
-					const width = Math.max(300, containerRect.width - 32); // padding 고려
-					const height = containerRect.height;
-					setWordCloudSize({ width, height });
-					return;
-				}
-			}
-
-			// 초기 렌더링 시 fallback (데스크톱만)
-			if (!isMobile) {
-				const width = Math.min(600, window.innerWidth - 64);
-				const height = Math.min(300, width * 0.5);
-				setWordCloudSize({ width, height });
-			} else if (isMobile && activeTab === 'network') {
-				const width = Math.min(400, window.innerWidth - 32);
-				const height = 200;
-				setWordCloudSize({ width, height });
-			}
-		};
-
-		// 약간의 지연을 두어 DOM이 완전히 렌더링된 후 크기 계산
-		const timeoutId = setTimeout(updateSize, 0);
-		// 추가 지연으로 DOM 완전 렌더링 보장
-		const timeoutId2 = setTimeout(updateSize, 100);
-		const timeoutId3 = setTimeout(updateSize, 300);
-
-		window.addEventListener('resize', updateSize);
-		// ResizeObserver를 사용하여 컨테이너 크기 변화 감지
-		const resizeObserver = new ResizeObserver(updateSize);
-
-		// ref가 연결된 후에 observe 시작
-		const observeContainers = () => {
-			if (wordCloudContainerRef.current && !isMobile) {
-				resizeObserver.observe(wordCloudContainerRef.current);
-			}
-			if (
-				wordCloudMobileContainerRef.current &&
-				isMobile &&
-				activeTab === 'network'
-			) {
-				resizeObserver.observe(wordCloudMobileContainerRef.current);
-			}
-		};
-
-		// 즉시 시도하고, 약간의 지연 후에도 시도 (탭 전환 시 DOM 재연결 대비)
-		observeContainers();
-		const observeTimeoutId = setTimeout(observeContainers, 100);
-		const observeTimeoutId2 = setTimeout(observeContainers, 300);
-
-		return () => {
-			clearTimeout(timeoutId);
-			clearTimeout(timeoutId2);
-			clearTimeout(timeoutId3);
-			clearTimeout(observeTimeoutId);
-			clearTimeout(observeTimeoutId2);
-			window.removeEventListener('resize', updateSize);
-			resizeObserver.disconnect();
-		};
-	}, [activeTab, isMobile]); // activeTab과 isMobile이 변경될 때마다 다시 설정
 
 	return (
 		<div className="w-full h-full bg-white overflow-auto">
@@ -249,86 +117,16 @@ const CompanyDetailClientContainer: FC<Props> = ({
 							<CompanyNetworkGraph companyData={companyData} />
 						</div>
 						{/* 워드 클라우드 */}
-						<div className="border border-border rounded-lg p-6 bg-white">
-							<div className="flex justify-between items-center mb-4">
-								<h3 className="text-xl font-bold">트렌드</h3>
-								<div className="flex flex-wrap gap-2 text-xs">
-									{Array.from(new Set(wordCloudData.map((w) => w.type))).map(
-										(type) => (
-											<span key={type} className="flex items-center gap-1">
-												<span
-													className="w-2 h-2 rounded-full"
-													style={{ backgroundColor: getColorByType(type) }}
-												></span>
-												{getLabelByType(type)}
-											</span>
-										)
-									)}
-								</div>
-							</div>
-							<div
-								ref={wordCloudContainerRef}
-								className="h-[300px] w-full overflow-visible flex items-center justify-center"
-							>
-								{transformedWordCloudData.length > 0 &&
-								wordCloudSize.width > 0 &&
-								wordCloudSize.height > 0 ? (
-									<svg
-										width={wordCloudSize.width}
-										height={wordCloudSize.height}
-										className="overflow-visible"
-										viewBox={`0 0 ${wordCloudSize.width} ${wordCloudSize.height}`}
-									>
-										<Wordcloud
-											words={transformedWordCloudData}
-											width={wordCloudSize.width}
-											height={wordCloudSize.height}
-											fontSize={fontSizeSetter}
-											font={'Arial'}
-											padding={2}
-											spiral={'archimedean'}
-											rotate={0}
-										>
-											{(cloudWords) =>
-												cloudWords.map((w) => {
-													const originalWord = wordCloudData.find(
-														(word) => word.text === w.text
-													);
-													const color = originalWord
-														? getColorByType(originalWord.type)
-														: '#6b7280';
-													return (
-														<Text
-															key={w.text}
-															fill={color}
-															textAnchor={'middle'}
-															transform={`translate(${w.x}, ${w.y}) rotate(${w.rotate})`}
-															fontSize={w.size}
-															fontFamily={w.font}
-														>
-															{w.text}
-														</Text>
-													);
-												})
-											}
-										</Wordcloud>
-									</svg>
-								) : (
-									<div className="text-sm text-muted-foreground text-center py-8">
-										워드클라우드 데이터가 없습니다.
-									</div>
-								)}
-							</div>
-						</div>
+						<CompanyWordCloud wordCloudData={wordCloudData} />
 
 						{/* 뉴스 및 공시 목록 */}
 						<div className="grid grid-cols-2 gap-6">
 							{/* 뉴스 목록 */}
-							<div className="border border-border rounded-lg p-6 bg-white">
-								<h3 className="text-xl font-bold mb-4">뉴스</h3>
-								<div className="space-y-2 max-h-[400px] overflow-y-auto">
-									{newsData.length > 0 ? (
-										newsData.map((news) => (
+							{newsData && newsData.length > 0 && (
+								<div className="border border-border rounded-lg p-6 bg-white">
+									<h3 className="text-xl font-bold mb-4">뉴스</h3>
+									<div className="space-y-2 max-h-[400px] overflow-y-auto">
+										{newsData.map((news) => (
 											<NewsItem
 												key={news.id}
 												id={news.id}
@@ -338,21 +136,17 @@ const CompanyDetailClientContainer: FC<Props> = ({
 												thumbnailUrl={news.thumbnailUrl}
 												publisher={news.publisher}
 											/>
-										))
-									) : (
-										<div className="text-sm text-muted-foreground text-center py-8">
-											뉴스가 없습니다.
-										</div>
-									)}
+										))}
+									</div>
 								</div>
-							</div>
+							)}
 
 							{/* 공시 목록 */}
-							<div className="border border-border rounded-lg p-6 bg-white">
-								<h3 className="text-xl font-bold mb-4">공시</h3>
-								<div className="space-y-2 max-h-[400px] overflow-y-auto">
-									{announcementsData.length > 0 ? (
-										announcementsData.map((announcement) => (
+							{announcementsData && announcementsData.length > 0 && (
+								<div className="border border-border rounded-lg p-6 bg-white">
+									<h3 className="text-xl font-bold mb-4">공시</h3>
+									<div className="space-y-2 max-h-[400px] overflow-y-auto">
+										{announcementsData.map((announcement) => (
 											<a
 												key={announcement.announcementId}
 												href={announcement.announcementUrl}
@@ -378,14 +172,10 @@ const CompanyDetailClientContainer: FC<Props> = ({
 													{announcement.title}
 												</h4>
 											</a>
-										))
-									) : (
-										<div className="text-sm text-muted-foreground text-center py-8">
-											공시 정보가 없습니다.
-										</div>
-									)}
+										))}
+									</div>
 								</div>
-							</div>
+							)}
 						</div>
 					</div>
 
@@ -427,85 +217,18 @@ const CompanyDetailClientContainer: FC<Props> = ({
 								<CompanyNetworkGraph companyData={companyData} />
 							</div>
 							{/* 워드 클라우드 */}
-							<div className="border border-border rounded-lg p-4 bg-white">
-								<div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0 mb-4">
-									<h3 className="text-base sm:text-lg font-bold">트렌드</h3>
-									<div className="flex flex-wrap gap-1.5 sm:gap-2 text-xs">
-										{Array.from(new Set(wordCloudData.map((w) => w.type))).map(
-											(type) => (
-												<span key={type} className="flex items-center gap-1">
-													<span
-														className="w-2 h-2 rounded-full"
-														style={{
-															backgroundColor: getColorByType(type),
-														}}
-													></span>
-													{getLabelByType(type)}
-												</span>
-											)
-										)}
-									</div>
-								</div>
-								<div
-									ref={wordCloudMobileContainerRef}
-									className="h-[200px] sm:h-[250px] w-full overflow-hidden flex items-center justify-center"
-								>
-									{transformedWordCloudData.length > 0 ? (
-										<svg
-											width={wordCloudSize.width}
-											height={wordCloudSize.height}
-											className="overflow-visible"
-										>
-											<Wordcloud
-												words={transformedWordCloudData}
-												width={wordCloudSize.width}
-												height={wordCloudSize.height}
-												fontSize={fontSizeSetter}
-												font={'Arial'}
-												padding={2}
-												spiral={'archimedean'}
-												rotate={0}
-											>
-												{(cloudWords) =>
-													cloudWords.map((w) => {
-														const originalWord = wordCloudData.find(
-															(word) => word.text === w.text
-														);
-														const color = originalWord
-															? getColorByType(originalWord.type)
-															: '#6b7280';
-														return (
-															<Text
-																key={w.text}
-																fill={color}
-																textAnchor={'middle'}
-																transform={`translate(${w.x}, ${w.y}) rotate(${w.rotate})`}
-																fontSize={w.size}
-																fontFamily={w.font}
-															>
-																{w.text}
-															</Text>
-														);
-													})
-												}
-											</Wordcloud>
-										</svg>
-									) : (
-										<div className="text-xs sm:text-sm text-muted-foreground text-center py-8">
-											워드클라우드 데이터가 없습니다.
-										</div>
-									)}
-								</div>
-							</div>
+							<CompanyWordCloud wordCloudData={wordCloudData} />
 
 							{/* 뉴스 및 공시 목록 */}
 							<div className="grid grid-cols-1 gap-4">
 								{/* 뉴스 목록 */}
-								<div className="border border-border rounded-lg p-4 bg-white">
-									<h3 className="text-base sm:text-lg font-bold mb-4">뉴스</h3>
-									<div className="space-y-2 max-h-[400px] overflow-y-auto">
-										{newsData.length > 0 ? (
-											newsData.map((news) => (
+								{newsData && newsData.length > 0 && (
+									<div className="border border-border rounded-lg p-4 bg-white">
+										<h3 className="text-base sm:text-lg font-bold mb-4">
+											뉴스
+										</h3>
+										<div className="space-y-2 max-h-[400px] overflow-y-auto">
+											{newsData.map((news) => (
 												<NewsItem
 													key={news.id}
 													id={news.id}
@@ -515,21 +238,19 @@ const CompanyDetailClientContainer: FC<Props> = ({
 													thumbnailUrl={news.thumbnailUrl}
 													publisher={news.publisher}
 												/>
-											))
-										) : (
-											<div className="text-xs sm:text-sm text-muted-foreground text-center py-8">
-												뉴스가 없습니다.
-											</div>
-										)}
+											))}
+										</div>
 									</div>
-								</div>
+								)}
 
 								{/* 공시 목록 */}
-								<div className="border border-border rounded-lg p-4 bg-white">
-									<h3 className="text-base sm:text-lg font-bold mb-4">공시</h3>
-									<div className="space-y-2 max-h-[400px] overflow-y-auto">
-										{announcementsData.length > 0 ? (
-											announcementsData.map((announcement) => (
+								{announcementsData && announcementsData.length > 0 && (
+									<div className="border border-border rounded-lg p-4 bg-white">
+										<h3 className="text-base sm:text-lg font-bold mb-4">
+											공시
+										</h3>
+										<div className="space-y-2 max-h-[400px] overflow-y-auto">
+											{announcementsData.map((announcement) => (
 												<a
 													key={announcement.announcementId}
 													href={announcement.announcementUrl}
@@ -555,14 +276,10 @@ const CompanyDetailClientContainer: FC<Props> = ({
 														{announcement.title}
 													</h4>
 												</a>
-											))
-										) : (
-											<div className="text-xs sm:text-sm text-muted-foreground text-center py-8">
-												공시 정보가 없습니다.
-											</div>
-										)}
+											))}
+										</div>
 									</div>
-								</div>
+								)}
 							</div>
 						</TabsContent>
 						<TabsContent value="companies" className="mt-6">
