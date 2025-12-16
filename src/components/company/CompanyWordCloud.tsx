@@ -15,19 +15,16 @@ interface CompanyWordCloudProps {
 }
 
 const CompanyWordCloud: FC<CompanyWordCloudProps> = ({ wordCloudData }) => {
-	// 모바일 여부 감지 (초기값을 직접 계산하여 불필요한 렌더링 방지)
-	const [isMobile, setIsMobile] = useState(() => {
-		if (typeof window !== 'undefined') {
-			return window.innerWidth < 1024;
-		}
-		return false;
-	});
+	// 모바일 여부 감지 (서버와 클라이언트에서 동일한 초기값 사용)
+	const [isMobile, setIsMobile] = useState(false);
 
 	useEffect(() => {
+		// 클라이언트에서만 모바일 여부 확인
 		const checkMobile = () => {
 			const newIsMobile = window.innerWidth < 1024;
-			setIsMobile((prev) => (prev !== newIsMobile ? newIsMobile : prev));
+			setIsMobile(newIsMobile);
 		};
+		checkMobile(); // 초기 확인
 		window.addEventListener('resize', checkMobile);
 		return () => window.removeEventListener('resize', checkMobile);
 	}, []);
@@ -59,10 +56,11 @@ const CompanyWordCloud: FC<CompanyWordCloudProps> = ({ wordCloudData }) => {
 	const fontSizeSetter = (datum: WordData) => fontScale(datum.value);
 
 	// 워드 클라우드 크기 계산 (반응형)
+	// 서버와 클라이언트에서 동일한 초기값 사용 (hydration 오류 방지)
 	const [wordCloudSize, setWordCloudSize] = useState<{
 		width: number;
 		height: number;
-	} | null>(null);
+	}>({ width: 600, height: 300 });
 	const wordCloudContainerRef = useRef<HTMLDivElement>(null);
 	const wordCloudMobileContainerRef = useRef<HTMLDivElement>(null);
 
@@ -89,13 +87,20 @@ const CompanyWordCloud: FC<CompanyWordCloudProps> = ({ wordCloudData }) => {
 				}
 			}
 			// 모바일 환경에서는 mobileContainer 사용
-			else if (mobileContainer && isMobile) {
-				const containerRect = mobileContainer.getBoundingClientRect();
-				if (containerRect.width > 0) {
-					newWidth = Math.max(300, containerRect.width - 32); // padding 고려
-					newHeight = containerRect.height;
+			else if (isMobile) {
+				// mobileContainer가 있으면 실제 크기 사용
+				if (mobileContainer) {
+					const containerRect = mobileContainer.getBoundingClientRect();
+					if (containerRect.width > 0) {
+						newWidth = Math.max(300, containerRect.width);
+						newHeight = containerRect.height;
+					} else {
+						// 컨테이너가 아직 렌더링되지 않았으면 window 크기 기반으로 계산
+						newWidth = Math.min(400, window.innerWidth - 32);
+						newHeight = 200;
+					}
 				} else {
-					// 초기 렌더링 시 fallback
+					// mobileContainer가 아직 없으면 window 크기 기반으로 계산
 					newWidth = Math.min(400, window.innerWidth - 32);
 					newHeight = 200;
 				}
@@ -151,7 +156,6 @@ const CompanyWordCloud: FC<CompanyWordCloudProps> = ({ wordCloudData }) => {
 
 	return (
 		transformedWordCloudData.length > 0 &&
-		wordCloudSize &&
 		wordCloudSize.width > 0 &&
 		wordCloudSize.height > 0 && (
 			<>
@@ -250,7 +254,8 @@ const CompanyWordCloud: FC<CompanyWordCloudProps> = ({ wordCloudData }) => {
 								<svg
 									width={wordCloudSize.width}
 									height={wordCloudSize.height}
-									className="overflow-visible"
+									className="overflow-visible max-w-full"
+									style={{ maxWidth: '100%' }}
 								>
 									<Wordcloud
 										words={transformedWordCloudData}
