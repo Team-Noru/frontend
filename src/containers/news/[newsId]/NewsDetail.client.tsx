@@ -96,10 +96,6 @@ const NewsDetailClient: FC<Props> = ({ newsData }) => {
 											}
 										}
 
-										// 해당 위치에 이미지 삽입
-										// 첫 번째 [IMG]면 imageUrl[0], 두 번째 [IMG]면 imageUrl[1] ...
-										// 마지막 segment가 아니면 이미지 삽입
-										// 또는 마지막 segment가 빈 문자열이면 이미지 삽입 (맨 뒤 [IMG] 처리)
 										if (
 											newsData.imageUrl[index] &&
 											(index < segments.length - 1 || !segment.trim())
@@ -132,7 +128,9 @@ const NewsDetailClient: FC<Props> = ({ newsData }) => {
 					{/* 우측: 연관 기업 목록 */}
 					<div className="w-80 shrink-0">
 						<div className="sticky top-8 space-y-4">
-							<h2 className="text-xl sm:text-2xl font-bold mb-4">연관 기업</h2>
+							<h2 className="text-xl sm:text-2xl font-bold mb-4">
+								언급된 기업
+							</h2>
 							<div className="space-y-3">
 								{sortCompanies(newsData.companies).map((company) => (
 									<CompanyItem
@@ -148,6 +146,28 @@ const NewsDetailClient: FC<Props> = ({ newsData }) => {
 									/>
 								))}
 							</div>
+							{newsData.related && newsData.related.length > 0 && (
+								<>
+									<h2 className="text-xl sm:text-2xl font-bold mb-4">
+										{newsData.name} 연관 기업
+									</h2>
+									<div className="space-y-3">
+										{sortCompanies(newsData.related).map((company) => (
+											<CompanyItem
+												key={`${company.companyId || ''}-${company.name}`}
+												companyId={company.companyId}
+												name={company.name}
+												isListed={company.isListed}
+												isDomestic={company.isDomestic}
+												sentiment={company.sentiment}
+												tags={company.tags}
+												showSentiment={true}
+												price={company.price}
+											/>
+										))}
+									</div>
+								</>
+							)}
 						</div>
 					</div>
 				</div>
@@ -157,7 +177,7 @@ const NewsDetailClient: FC<Props> = ({ newsData }) => {
 					<Tabs value={activeTab} onValueChange={setActiveTab}>
 						<TabsList>
 							<TabsTrigger value="article">기사</TabsTrigger>
-							<TabsTrigger value="companies">연관기업</TabsTrigger>
+							<TabsTrigger value="companies">기업 목록</TabsTrigger>
 						</TabsList>
 						<TabsContent value="article" className="mt-6">
 							<article className="space-y-4 sm:space-y-6">
@@ -262,21 +282,53 @@ const NewsDetailClient: FC<Props> = ({ newsData }) => {
 							</article>
 						</TabsContent>
 						<TabsContent value="companies" className="mt-6">
-							<div className="space-y-3">
-								{sortCompanies(newsData.companies).map((company) => (
-									<CompanyItem
-										key={`${company.companyId || ''}-${company.name}`}
-										companyId={company.companyId}
-										name={company.name}
-										isListed={company.isListed}
-										isDomestic={company.isDomestic}
-										sentiment={company.sentiment}
-										tags={company.tags}
-										showSentiment={true}
-										price={company.price}
-									/>
-								))}
+							{/* 언급된 기업 */}
+							<div className="mb-6">
+								<h2 className="text-base font-bold mb-3">언급된 기업</h2>
+								<div className="space-y-3">
+									{sortCompanies(newsData.companies).map((company) => (
+										<CompanyItem
+											key={`${company.companyId || ''}-${company.name}`}
+											companyId={company.companyId}
+											name={company.name}
+											isListed={company.isListed}
+											isDomestic={company.isDomestic}
+											sentiment={company.sentiment}
+											tags={company.tags}
+											showSentiment={true}
+											price={company.price}
+										/>
+									))}
+								</div>
 							</div>
+							{/* 구분선 및 연관 기업 - related가 있을 때만 표시 */}
+							{newsData.related && newsData.related.length > 0 && (
+								<>
+									{/* 구분선 */}
+									<div className="border-t border-border my-6"></div>
+									{/* 연관 기업 */}
+									<div>
+										<h2 className="text-base font-bold mb-3">
+											{newsData.name} 연관 기업
+										</h2>
+										<div className="space-y-3">
+											{sortCompanies(newsData.related).map((company) => (
+												<CompanyItem
+													key={`${company.companyId || ''}-${company.name}`}
+													companyId={company.companyId}
+													name={company.name}
+													isListed={company.isListed}
+													isDomestic={company.isDomestic}
+													sentiment={company.sentiment}
+													tags={company.tags}
+													showSentiment={true}
+													price={company.price}
+												/>
+											))}
+										</div>
+									</div>
+								</>
+							)}
 						</TabsContent>
 					</Tabs>
 				</div>
