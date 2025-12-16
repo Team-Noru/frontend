@@ -149,7 +149,7 @@ const NewsDetailClient: FC<Props> = ({ newsData }) => {
 							{newsData.related && newsData.related.length > 0 && (
 								<>
 									<h2 className="text-xl sm:text-2xl font-bold mb-4">
-										{newsData.name} 연관 기업
+										공시로 보는 {newsData.name} 연관 기업
 									</h2>
 									<div className="space-y-3">
 										{sortCompanies(newsData.related).map((company) => (
@@ -309,7 +309,7 @@ const NewsDetailClient: FC<Props> = ({ newsData }) => {
 									{/* 연관 기업 */}
 									<div>
 										<h2 className="text-base font-bold mb-3">
-											{newsData.name} 연관 기업
+											공시로 보는 {newsData.name} 연관 기업
 										</h2>
 										<div className="space-y-3">
 											{sortCompanies(newsData.related).map((company) => (

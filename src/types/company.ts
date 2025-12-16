@@ -9,7 +9,7 @@ export interface Tag {
 	id: number;
 	direction: 'IN' | 'OUT';
 	label: string;
-	relReason: string;
+	relReason: string | null;
 }
 
 export interface Company {

@@ -38,8 +38,10 @@ const CompanyDetailClientContainer: FC<Props> = ({
 
 	// 연관 기업 정렬: companyId가 있는 회사를 우선, 그 다음 isDomestic && isListed > isDomestic && !isListed > !isDomestic
 	const sortedRelatedCompanies = useMemo(() => {
-		return sortCompanies(companyData.related);
-	}, [companyData.related]);
+		return sortCompanies(companyData.related).filter(
+			(company) => company.companyId && company.isDomestic && company.isListed
+		);
+	}, [companyData.related, companyData.companyId]);
 
 	return (
 		<div className="w-full h-full bg-white overflow-auto">

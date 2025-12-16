@@ -49,7 +49,7 @@ const CompanyItem: FC<Props> = ({
 	// 바텀시트 상태
 	const [selectedTag, setSelectedTag] = useState<{
 		tag: Tag;
-		relReasons: string[];
+		relReasons: (string | null)[];
 	} | null>(null);
 
 	// tag.label을 한글로 변환하는 함수
@@ -64,20 +64,25 @@ const CompanyItem: FC<Props> = ({
 
 	// 태그를 label 기준으로 그룹화하고 relReason 수집
 	const groupedTags = useMemo(() => {
-		const tagMap = new Map<string, { tag: Tag; relReasons: string[] }>();
+		const tagMap = new Map<
+			string,
+			{ tag: Tag; relReasons: (string | null)[] }
+		>();
 		tags.forEach((tag) => {
 			const existing = tagMap.get(tag.label);
-			if (existing) {
-				// 중복된 label이 있으면 relReason만 추가
-				if (!existing.relReasons.includes(tag.relReason)) {
-					existing.relReasons.push(tag.relReason);
+			if (tag.relReason) {
+				if (existing) {
+					// 중복된 label이 있으면 relReason만 추가
+					if (!existing.relReasons.includes(tag.relReason)) {
+						existing.relReasons.push(tag.relReason);
+					}
+				} else {
+					// 새로운 label이면 새로 추가
+					tagMap.set(tag.label, {
+						tag,
+						relReasons: [tag.relReason],
+					});
 				}
-			} else {
-				// 새로운 label이면 새로 추가
-				tagMap.set(tag.label, {
-					tag,
-					relReasons: [tag.relReason],
-				});
 			}
 		});
 		return Array.from(tagMap.values());
@@ -177,7 +182,7 @@ const CompanyItem: FC<Props> = ({
 					{groupedTags.map(({ tag, relReasons }) => {
 						const translatedLabel = translateTagLabel(tag.label);
 						const tooltipText = relReasons
-							.map((reason) => `- ${reason}`)
+							.map((reason) => `· ${reason}`)
 							.join('\n');
 						// 변환된 label을 가진 tag 객체 생성
 						const translatedTag = { ...tag, label: translatedLabel };

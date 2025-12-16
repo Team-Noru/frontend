@@ -17,8 +17,8 @@ const GraphCanvas = dynamic(
 
 interface RelationsData {
 	name: string;
-	inReasons: string[];
-	outReasons: string[];
+	inReasons: (string | null)[];
+	outReasons: (string | null)[];
 }
 
 interface RelationsContentProps {
@@ -36,12 +36,15 @@ const RelationsContent: FC<RelationsContentProps> = ({ relations }) => {
 				<div>
 					<div className="font-medium text-blue-600 mb-2 text-sm">IN</div>
 					<ul className="space-y-1.5 text-muted-foreground pl-2">
-						{relations.inReasons.map((reason, index) => (
-							<li key={index} className="flex items-start gap-1.5 text-sm">
-								<span className="text-blue-500 mt-0.5">•</span>
-								<span>{reason}</span>
-							</li>
-						))}
+						{relations.inReasons.map((reason, index) => {
+							if (!reason) return null;
+							return (
+								<li key={index} className="flex items-start gap-1.5 text-sm">
+									<span className="text-blue-500 mt-0.5">•</span>
+									<span>{reason}</span>
+								</li>
+							);
+						})}
 					</ul>
 				</div>
 			)}
@@ -50,12 +53,15 @@ const RelationsContent: FC<RelationsContentProps> = ({ relations }) => {
 				<div>
 					<div className="font-medium text-green-600 mb-2 text-sm">OUT</div>
 					<ul className="space-y-1.5 text-muted-foreground pl-2">
-						{relations.outReasons.map((reason, index) => (
-							<li key={index} className="flex items-start gap-1.5 text-sm">
-								<span className="text-green-500 mt-0.5">•</span>
-								<span>{reason}</span>
-							</li>
-						))}
+						{relations.outReasons.map((reason, index) => {
+							if (!reason) return null;
+							return (
+								<li key={index} className="flex items-start gap-1.5 text-sm">
+									<span className="text-green-500 mt-0.5">•</span>
+									<span>{reason}</span>
+								</li>
+							);
+						})}
 					</ul>
 				</div>
 			)}
