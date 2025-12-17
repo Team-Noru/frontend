@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 import { sortCompanies } from '@/lib/sort';
+import { cn } from '@/lib/utils';
 import { Company } from '@/types/company';
 import { News } from '@/types/news';
 
@@ -81,14 +82,20 @@ const SearchResults: FC<Props> = ({
 					<div className="space-y-2">
 						{sortCompanies(companies)
 							.slice(0, 5)
-							.map((company) => (
-								<Link
-									key={`${company.companyId || ''}-${company.name}`}
-									href={`/company/${company.companyId}`}
-									onClick={onItemClick}
-									className="block"
-								>
-									<div className="p-3 hover:bg-muted/50 rounded-lg transition-colors border border-border">
+							.map((company) => {
+								const isClickable =
+									!!company.companyId && company.isDomestic && company.isListed;
+
+								const content = (
+									<div
+										className={cn(
+											'p-3 rounded-lg transition-colors border border-border',
+											isClickable
+												? 'hover:bg-muted/50 cursor-pointer'
+												: 'opacity-60 cursor-not-allowed pointer-events-none'
+										)}
+										aria-disabled={!isClickable}
+									>
 										<div className="font-medium text-sm">{company.name}</div>
 										{company.companyId && (
 											<div className="text-xs text-muted-foreground mt-1">
@@ -96,8 +103,30 @@ const SearchResults: FC<Props> = ({
 											</div>
 										)}
 									</div>
-								</Link>
-							))}
+								);
+
+								if (!isClickable) {
+									return (
+										<div
+											key={`${company.companyId || ''}-${company.name}`}
+											className="block"
+										>
+											{content}
+										</div>
+									);
+								}
+
+								return (
+									<Link
+										key={`${company.companyId || ''}-${company.name}`}
+										href={`/company/${company.companyId}`}
+										onClick={onItemClick}
+										className="block"
+									>
+										{content}
+									</Link>
+								);
+							})}
 						{companies.length > 5 && (
 							<button
 								type="button"
