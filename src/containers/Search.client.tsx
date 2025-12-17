@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { useRouter, useSearchParams } from 'next/navigation';
 
@@ -18,19 +18,36 @@ import { Sentiment } from '@/types/company';
 const SearchClient = () => {
 	const router = useRouter();
 	const searchParams = useSearchParams();
-	const initialQuery = sanitizeInput(searchParams.get('q') || '');
-	const [searchQuery, setSearchQuery] = useState(initialQuery);
+	const urlQuery = useMemo(() => searchParams.get('q') || '', [searchParams]);
+	const urlType = useMemo(
+		() => (searchParams.get('type') as 'news' | 'companies' | null) || null,
+		[searchParams]
+	);
+
+	const [searchQuery, setSearchQuery] = useState(() => sanitizeInput(urlQuery));
 	const debouncedQuery = useDebounce(searchQuery, 300);
 	const { data: searchResults, isLoading } = useSearch(debouncedQuery);
 
 	// 탭 상태 관리 (URL 변경 없이)
-	const [activeTab, setActiveTab] = useState(() => {
-		const type = searchParams.get('type');
-		return type === 'companies' ? 'companies' : 'news';
-	});
+	const [activeTab, setActiveTab] = useState<'news' | 'companies'>(
+		urlType ?? 'news'
+	);
+
+	// URL의 ?q=가 바뀌면 input/searchQuery도 동기화해서 검색을 재실행
+	useEffect(() => {
+		const sanitized = sanitizeInput(urlQuery);
+		// eslint-disable-next-line react-hooks/set-state-in-effect -- URL(searchParams)은 외부 상태이므로 동기화가 필요함
+		setSearchQuery(sanitized);
+	}, [urlQuery]);
+
+	// URL의 ?type=가 바뀌면 탭도 동기화
+	useEffect(() => {
+		// eslint-disable-next-line react-hooks/set-state-in-effect -- URL(searchParams)은 외부 상태이므로 동기화가 필요함
+		if (urlType) setActiveTab(urlType);
+	}, [urlType]);
 
 	const handleTabChange = (value: string) => {
-		setActiveTab(value);
+		setActiveTab(value as 'news' | 'companies');
 	};
 
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -73,6 +90,7 @@ const SearchClient = () => {
 		// 데스크탑에서만 페이지 이동
 		const sanitizedQuery = sanitizeInput(searchQuery);
 		router.push(`/search?q=${encodeURIComponent(sanitizedQuery)}`);
+		setSearchQuery('');
 	};
 
 	return (
