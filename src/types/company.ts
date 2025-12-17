@@ -11,6 +11,7 @@ export interface Tag {
 	label: string;
 	relReason: string | null;
 	newsId?: number;
+	disclosureUrl?: string;
 }
 
 export interface Company {

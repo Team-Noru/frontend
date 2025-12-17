@@ -14,7 +14,11 @@ import { Tag } from '@/types/company';
 
 interface TagWithTooltipProps {
 	tag: Tag;
-	relReasons: { reason: string | null; newsId?: number }[];
+	relReasons: {
+		reason: string | null;
+		newsId?: number;
+		disclosureUrl?: string;
+	}[];
 	onMobileClick?: () => void;
 	isMobile: boolean;
 }
@@ -36,7 +40,7 @@ export const TagWithTooltip: FC<TagWithTooltipProps> = ({
 	const tagElement = (
 		<span
 			className={cn(
-				'relative px-2 py-0.5 sm:py-1 text-xs bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-md font-medium',
+				'relative inline-flex items-center gap-1 px-2 py-0.5 sm:py-1 text-xs bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-md font-medium',
 				isMobile ? 'cursor-pointer' : 'cursor-help'
 			)}
 			onClick={handleClick}
@@ -80,6 +84,33 @@ export const TagWithTooltip: FC<TagWithTooltipProps> = ({
 							</svg>
 							<span>{item.reason}</span>
 						</Link>
+					) : item.disclosureUrl ? (
+						<a
+							href={item.disclosureUrl}
+							target="_blank"
+							rel="noopener noreferrer"
+							className="flex items-center gap-1.5 hover:underline"
+							onClick={(e) => e.stopPropagation()}
+						>
+							•
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="12"
+								height="12"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								strokeWidth="2"
+								strokeLinecap="round"
+								strokeLinejoin="round"
+								className="shrink-0"
+							>
+								<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+								<polyline points="15 3 21 3 21 9" />
+								<line x1="10" y1="14" x2="21" y2="3" />
+							</svg>
+							<span>{item.reason}</span>
+						</a>
 					) : (
 						<span>· {item.reason}</span>
 					)}

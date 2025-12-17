@@ -49,7 +49,11 @@ const CompanyItem: FC<Props> = ({
 	// 바텀시트 상태
 	const [selectedTag, setSelectedTag] = useState<{
 		tag: Tag;
-		relReasons: { reason: string | null; newsId?: number }[];
+		relReasons: {
+			reason: string | null;
+			newsId?: number;
+			disclosureUrl?: string;
+		}[];
 	} | null>(null);
 
 	// tag.label을 한글로 변환하는 함수
@@ -66,7 +70,14 @@ const CompanyItem: FC<Props> = ({
 	const groupedTags = useMemo(() => {
 		const tagMap = new Map<
 			string,
-			{ tag: Tag; relReasons: { reason: string | null; newsId?: number }[] }
+			{
+				tag: Tag;
+				relReasons: {
+					reason: string | null;
+					newsId?: number;
+					disclosureUrl?: string;
+				}[];
+			}
 		>();
 		tags.forEach((tag) => {
 			const existing = tagMap.get(tag.label);
@@ -74,12 +85,15 @@ const CompanyItem: FC<Props> = ({
 				const relReasonItem = {
 					reason: tag.relReason,
 					newsId: tag.newsId,
+					disclosureUrl: tag.disclosureUrl,
 				};
 				if (existing) {
-					// 중복된 label이 있으면 relReason만 추가 (newsId 포함)
+					// 중복된 label이 있으면 relReason만 추가 (newsId/disclosureUrl 포함)
 					const exists = existing.relReasons.some(
 						(item) =>
-							item.reason === tag.relReason && item.newsId === tag.newsId
+							item.reason === tag.relReason &&
+							item.newsId === tag.newsId &&
+							item.disclosureUrl === tag.disclosureUrl
 					);
 					if (!exists) {
 						existing.relReasons.push(relReasonItem);
@@ -253,6 +267,33 @@ const CompanyItem: FC<Props> = ({
 											</svg>
 											<span>{item.reason}</span>
 										</Link>
+									) : item.disclosureUrl ? (
+										<a
+											href={item.disclosureUrl}
+											target="_blank"
+											rel="noopener noreferrer"
+											className="flex items-center gap-1.5 hover:underline"
+											onClick={() => setSelectedTag(null)}
+										>
+											•
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												width="14"
+												height="14"
+												viewBox="0 0 24 24"
+												fill="none"
+												stroke="currentColor"
+												strokeWidth="2"
+												strokeLinecap="round"
+												strokeLinejoin="round"
+												className="shrink-0"
+											>
+												<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+												<polyline points="15 3 21 3 21 9" />
+												<line x1="10" y1="14" x2="21" y2="3" />
+											</svg>
+											<span>{item.reason}</span>
+										</a>
 									) : (
 										<span>• {item.reason}</span>
 									)}
@@ -300,10 +341,36 @@ const CompanyItem: FC<Props> = ({
 											<polyline points="15 3 21 3 21 9" />
 											<line x1="10" y1="14" x2="21" y2="3" />
 										</svg>
-										<span>- {item.reason}</span>
+										<span>· {item.reason}</span>
 									</Link>
+								) : item.disclosureUrl ? (
+									<a
+										href={item.disclosureUrl}
+										target="_blank"
+										rel="noopener noreferrer"
+										className="flex items-center gap-1.5 hover:underline"
+										onClick={() => setSelectedTag(null)}
+									>
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											width="14"
+											height="14"
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke="currentColor"
+											strokeWidth="2"
+											strokeLinecap="round"
+											strokeLinejoin="round"
+											className="shrink-0"
+										>
+											<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+											<polyline points="15 3 21 3 21 9" />
+											<line x1="10" y1="14" x2="21" y2="3" />
+										</svg>
+										<span>· {item.reason}</span>
+									</a>
 								) : (
-									<span>- {item.reason}</span>
+									<span>· {item.reason}</span>
 								)}
 							</div>
 						))}
