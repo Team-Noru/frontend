@@ -144,7 +144,7 @@ const NewsDetailClient: FC<Props> = ({ newsData }) => {
 														alt={`${newsData.title} - 이미지 ${index + 1}`}
 														width={1200}
 														height={800}
-														className="max-w-full h-auto max-h-[400px] sm:max-h-[500px] md:max-h-[600px]"
+														className="max-w-full h-auto max-h-[400px] sm:max-h-[500px] md:max-h-[600px] object-contain"
 														sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 1280px"
 														unoptimized
 														preload
